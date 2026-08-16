@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-16T17:19:50.680Z",
+  "generatedAt": "2026-08-16T18:33:28.447Z",
   "table": {
     "width": 8,
     "height": 4,
@@ -12,49 +12,49 @@
     {
       "id": "K00-01",
       "status": "合格",
-      "checks": 7,
+      "checks": 9,
       "errors": []
     },
     {
       "id": "K01-01",
       "status": "合格",
-      "checks": 7,
+      "checks": 9,
       "errors": []
     },
     {
       "id": "K01-02",
       "status": "合格",
-      "checks": 7,
+      "checks": 9,
       "errors": []
     },
     {
       "id": "K01-03",
       "status": "合格",
-      "checks": 7,
+      "checks": 9,
       "errors": []
     },
     {
       "id": "K02-01",
       "status": "合格",
-      "checks": 7,
+      "checks": 9,
       "errors": []
     },
     {
       "id": "K04-01",
       "status": "合格",
-      "checks": 7,
+      "checks": 9,
       "errors": []
     },
     {
       "id": "K06-01",
       "status": "合格",
-      "checks": 7,
+      "checks": 9,
       "errors": []
     },
     {
       "id": "K06-02",
       "status": "合格",
-      "checks": 7,
+      "checks": 9,
       "errors": []
     }
   ],

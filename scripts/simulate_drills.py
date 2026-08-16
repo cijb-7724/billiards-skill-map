@@ -26,6 +26,37 @@ POCKETS = {
     "左下": (0.0, 4.0), "下中央": (4.0, 4.0), "右下": (8.0, 4.0),
 }
 COLORS = {"CB": "#dbe9e3", "OB1": "#efcc69"}
+SLOW_CLOTH_PARAMS = {"u_s": 0.24, "u_r": 0.018, "u_sp_proportionality": 0.55}
+
+
+def quaternion_multiply(left: tuple[float, float, float, float], right: tuple[float, float, float, float]) -> tuple[float, float, float, float]:
+    lw, lx, ly, lz = left
+    rw, rx, ry, rz = right
+    return (
+        lw * rw - lx * rx - ly * ry - lz * rz,
+        lw * rx + lx * rw + ly * rz - lz * ry,
+        lw * ry - lx * rz + ly * rw + lz * rx,
+        lw * rz + lx * ry - ly * rx + lz * rw,
+    )
+
+
+def orientation_history(rvw, times) -> list[tuple[float, float, float, float]]:
+    """Integrate pooltool's world-space angular velocity for browser rendering."""
+    orientations = [(1.0, 0.0, 0.0, 0.0)]
+    current = orientations[0]
+    for index in range(1, len(times)):
+        dt = float(times[index] - times[index - 1])
+        wx, wy, wz = (float(value) for value in rvw[index - 1, 2, :])
+        magnitude = math.sqrt(wx * wx + wy * wy + wz * wz)
+        if magnitude > 1e-10 and dt > 0:
+            half_angle = magnitude * dt / 2
+            scale = math.sin(half_angle) / magnitude
+            delta = (math.cos(half_angle), wx * scale, wy * scale, wz * scale)
+            current = quaternion_multiply(delta, current)
+            norm = math.sqrt(sum(value * value for value in current))
+            current = tuple(value / norm for value in current)
+        orientations.append(current)
+    return orientations
 
 
 def to_pool(x: float, y: float) -> tuple[float, float]:
@@ -75,7 +106,10 @@ def point_inside(point: dict, zone: dict) -> bool:
 
 def simulate(drill: dict) -> tuple[dict, dict]:
     table = pt.Table.from_table_specs(pt.objects.PocketTableSpecs(l=LENGTH, w=WIDTH))
-    balls = tuple(pt.Ball.create(ball["id"], xy=to_pool(ball["x"], ball["y"])) for ball in drill["balls"])
+    balls = tuple(
+        pt.Ball.create(ball["id"], xy=to_pool(ball["x"], ball["y"]), **SLOW_CLOTH_PARAMS)
+        for ball in drill["balls"]
+    )
     cue = pt.Cue(cue_ball_id="CB")
     system = pt.System(table=table, cue=cue, balls=balls)
 
@@ -92,11 +126,12 @@ def simulate(drill: dict) -> tuple[dict, dict]:
     pt.simulate(system, continuous=True, dt=0.015, inplace=True)
 
     physical_duration = float(system.t)
-    display_scale = max(1.0, 2.8 / max(physical_duration, 0.01))
+    display_scale = 1.0
     trajectories = []
     raw_points: dict[str, list[dict]] = {}
     for ball_id, ball in system.balls.items():
         rvw, states, times = ball.history_cts.vectorize()
+        orientations = orientation_history(rvw, times)
         stride = max(1, len(times) // 150)
         indices = list(range(0, len(times), stride))
         if indices[-1] != len(times) - 1:
@@ -110,6 +145,7 @@ def simulate(drill: dict) -> tuple[dict, dict]:
             points.append({
                 "t": round(float(times[index]) * display_scale, 4),
                 "x": round(x, 4), "y": round(y, 4),
+                "q": [round(value, 6) for value in orientations[index]],
                 **({"visible": False} if pocketed else {}),
             })
         raw_points[ball_id] = points
@@ -160,7 +196,11 @@ def main() -> None:
     OUTPUT.write_text(json.dumps(output, ensure_ascii=False, indent=2) + "\n")
     REPORT.parent.mkdir(parents=True, exist_ok=True)
     REPORT.write_text(json.dumps({
-        "engine": f"pooltool {pt.__version__}", "table": {"lengthM": LENGTH, "widthM": WIDTH},
+        "engine": f"pooltool {pt.__version__}",
+        "table": {
+            "lengthM": LENGTH, "widthM": WIDTH,
+            "cloth": {"slidingFriction": 0.24, "rollingFriction": 0.018, "spinFrictionFactor": 0.55},
+        },
         "passed": sum(report["status"] == "合格" for report in reports),
         "total": len(reports), "results": reports,
     }, ensure_ascii=False, indent=2) + "\n")

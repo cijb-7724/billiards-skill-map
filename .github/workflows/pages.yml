@@ -18,7 +18,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: pnpm/action-setup@v4
         with:
           version: 11.19.0
@@ -33,10 +33,9 @@ jobs:
           cache: pip
       - run: pip install -r requirements.txt
       - run: python scripts/simulate_drills.py
-      - run: pnpm run validate:drills
-      - run: pnpm run build:pages
+      - run: pnpm test
       - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v4
         with:
           path: pages-dist
   deploy:

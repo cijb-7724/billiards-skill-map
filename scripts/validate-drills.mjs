@@ -14,6 +14,7 @@ const pockets = {
 
 const distance = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
 const inside = (point, zone) => point.x >= zone.x1 && point.x <= zone.x2 && point.y >= zone.y1 && point.y <= zone.y2;
+const onQuarterGrid = (value) => Math.abs(value * 4 - Math.round(value * 4)) < 1e-9;
 
 function interpolate(points, time) {
   if (time <= points[0].t) return points[0];
@@ -48,6 +49,9 @@ for (const drill of data.drills) {
     if (ball.x < TABLE.radius || ball.x > TABLE.width - TABLE.radius || ball.y < TABLE.radius || ball.y > TABLE.height - TABLE.radius) {
       drillErrors.push(`${drill.id}: ${ball.id} の初期座標がプレー領域外です`);
     }
+    if (!onQuarterGrid(ball.x) || !onQuarterGrid(ball.y)) {
+      drillErrors.push(`${drill.id}: ${ball.id} の初期座標は0.25目盛に揃っていません`);
+    }
   }
   for (let i = 0; i < drill.balls.length; i++) {
     for (let j = i + 1; j < drill.balls.length; j++) {
@@ -68,6 +72,9 @@ for (const drill of data.drills) {
     const zone = drill.successZone;
     if (zone.x1 >= zone.x2 || zone.y1 >= zone.y2 || zone.x1 < 0 || zone.x2 > 8 || zone.y1 < 0 || zone.y2 > 4) {
       drillErrors.push(`${drill.id}: 合格領域の長方形が不正です`);
+    }
+    if (![zone.x1, zone.y1, zone.x2, zone.y2].every(onQuarterGrid)) {
+      drillErrors.push(`${drill.id}: 合格領域の境界は0.25目盛に揃っていません`);
     }
     const targetTrajectory = drill.trajectories.find((trajectory) => trajectory.ballId === drill.successBallId);
     if (!targetTrajectory) drillErrors.push(`${drill.id}: 合格判定対象の軌道がありません`);
@@ -104,7 +111,7 @@ for (const drill of data.drills) {
   }
 
   errors.push(...drillErrors);
-  results.push({ id: drill.id, status: drillErrors.length ? "不合格" : "合格", checks: 7, errors: drillErrors });
+  results.push({ id: drill.id, status: drillErrors.length ? "不合格" : "合格", checks: 9, errors: drillErrors });
 }
 
 for (const chapter of data.chapters) {
