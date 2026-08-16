@@ -12,7 +12,7 @@ type ThreeDrill = {
 type SceneState = {
   renderer: THREE.WebGLRenderer;
   scene: THREE.Scene;
-  camera: THREE.PerspectiveCamera;
+  camera: THREE.PerspectiveCamera | THREE.OrthographicCamera;
   groups: Map<string, THREE.Group>;
   cue: THREE.Group;
 };
@@ -425,7 +425,9 @@ export function ThreeTable({
 
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x263b34);
-    const camera = new THREE.PerspectiveCamera(viewMode === "player" ? 45 : 30, 2, .01, 10);
+    const camera = viewMode === "player"
+      ? new THREE.PerspectiveCamera(45, 2, .01, 12)
+      : new THREE.OrthographicCamera(-1.5, 1.5, .8, -.8, .01, 12);
 
     scene.add(new THREE.HemisphereLight(0xfff7e9, 0x37564b, 2.45));
     const keyLight = new THREE.DirectionalLight(0xfff3db, 4.2);
@@ -458,6 +460,7 @@ export function ThreeTable({
     const groups = new Map<string, THREE.Group>();
     drill.balls.forEach((ball) => {
       const group = createBall(ball);
+      group.position.set(ball.x * DIAMOND_M, BALL_RADIUS, ball.y * DIAMOND_M);
       scene.add(group);
       groups.set(ball.id, group);
     });
@@ -504,7 +507,21 @@ export function ThreeTable({
     const resize = () => {
       const rect = canvas.getBoundingClientRect();
       renderer.setSize(rect.width, rect.height, false);
-      camera.aspect = rect.width / Math.max(1, rect.height);
+      const aspect = rect.width / Math.max(1, rect.height);
+      if (camera instanceof THREE.PerspectiveCamera) {
+        camera.aspect = aspect;
+      } else {
+        const framedWidth = TABLE_LENGTH + .34;
+        const framedHeight = TABLE_WIDTH + .34;
+        let halfWidth = framedWidth / 2;
+        let halfHeight = framedHeight / 2;
+        if (aspect > framedWidth / framedHeight) halfWidth = halfHeight * aspect;
+        else halfHeight = halfWidth / Math.max(.1, aspect);
+        camera.left = -halfWidth;
+        camera.right = halfWidth;
+        camera.top = halfHeight;
+        camera.bottom = -halfHeight;
+      }
       camera.updateProjectionMatrix();
       renderer.render(scene, camera);
     };
@@ -543,7 +560,7 @@ export function ThreeTable({
     });
     state.cue.visible = time < .12;
     state.renderer.render(state.scene, state.camera);
-  }, [drill.balls, time, trajectories]);
+  }, [drill.balls, time, trajectories, viewMode]);
 
   const label = viewMode === "player" ? "手玉後方のプレイヤー視点" : "台の真上から見る3D俯瞰";
   return (

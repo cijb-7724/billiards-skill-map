@@ -19,8 +19,6 @@ export type SimulationRequest = {
   balls: Array<{ id: string; color: string; x: number; y: number }>;
   aimPoint: { x: number; y: number };
   cue: { x: number; y: number; speedMps: number; elevationDeg: number };
-  baselineCue?: { x: number; y: number; speedMps: number; elevationDeg: number };
-  referenceShot?: BrowserShot;
 };
 
 type V3 = [number, number, number];
@@ -53,10 +51,10 @@ const CUE_END_MASS = MASS / 30;
 const STEP = 1 / 240;
 const SAMPLE_STEP = 1 / 60;
 const MAX_TIME = 8;
-const CORNER_POCKET_RADIUS = 0.12;
-const SIDE_POCKET_RADIUS = 0.075;
-const CORNER_OPENING = 0.18;
-const SIDE_OPENING = 0.13;
+const CORNER_POCKET_RADIUS = 0.068;
+const SIDE_POCKET_RADIUS = 0.058;
+const CORNER_OPENING = 0.105;
+const SIDE_OPENING = 0.085;
 
 const add = (a: V3, b: V3): V3 => [a[0] + b[0], a[1] + b[1], a[2] + b[2]];
 const sub = (a: V3, b: V3): V3 => [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
@@ -195,7 +193,14 @@ const pocketCenters: V3[] = [
 function nearPocket(ball: SimBall) {
   return pocketCenters.some((pocket) => {
     const isSidePocket = Math.abs(pocket[1] - TABLE_LENGTH / 2) < 1e-9;
-    return Math.hypot(ball.r[0] - pocket[0], ball.r[1] - pocket[1]) < (isSidePocket ? SIDE_POCKET_RADIUS : CORNER_POCKET_RADIUS);
+    const distance = Math.hypot(ball.r[0] - pocket[0], ball.r[1] - pocket[1]);
+    if (isSidePocket) {
+      const crossedRail = pocket[0] === 0 ? ball.r[0] < R * .72 : ball.r[0] > TABLE_WIDTH - R * .72;
+      return crossedRail && distance < SIDE_POCKET_RADIUS;
+    }
+    const crossedShortRail = pocket[0] === 0 ? ball.r[0] < R * .82 : ball.r[0] > TABLE_WIDTH - R * .82;
+    const crossedLongRail = pocket[1] === 0 ? ball.r[1] < R * .82 : ball.r[1] > TABLE_LENGTH - R * .82;
+    return crossedShortRail && crossedLongRail && distance < CORNER_POCKET_RADIUS;
   });
 }
 
@@ -381,90 +386,5 @@ export function simulateBrowserShot(request: SimulationRequest): BrowserShot {
     engine: "ブラウザー物理モデル 0.1",
     calculationMs: Number((performance.now() - started).toFixed(2)),
     trajectories: balls.map((ball) => ({ ballId: ball.id, color: ball.color, points: samples.get(ball.id)! })),
-  };
-}
-
-function interpolateTrajectory(points: ShotPoint[], normalizedTime: number): ShotPoint {
-  const time = clamp(normalizedTime, 0, 1) * points.at(-1)!.t;
-  if (time <= points[0].t) return points[0];
-  if (time >= points.at(-1)!.t) return points.at(-1)!;
-  const index = points.findIndex((point) => point.t >= time);
-  const start = points[index - 1];
-  const end = points[index];
-  const ratio = (time - start.t) / Math.max(1e-9, end.t - start.t);
-  let endQ = end.q;
-  if (dot4(start.q, endQ) < 0) endQ = endQ.map((value) => -value) as Quaternion;
-  return {
-    t: time,
-    x: start.x + (end.x - start.x) * ratio,
-    y: start.y + (end.y - start.y) * ratio,
-    q: normalize4(start.q.map((value, qIndex) => value + (endQ[qIndex] - value) * ratio) as Quaternion),
-    visible: start.visible !== false && (end.visible !== false || ratio < .98),
-  };
-}
-
-const dot4 = (a: Quaternion, b: Quaternion) => a.reduce((sum, value, index) => sum + value * b[index], 0);
-const normalize4 = (q: Quaternion): Quaternion => {
-  const magnitude = Math.hypot(...q) || 1;
-  return q.map((value) => value / magnitude) as Quaternion;
-};
-const inverseQuaternion = ([w, x, y, z]: Quaternion): Quaternion => [w, -x, -y, -z];
-const blendQuaternion = (start: Quaternion, end: Quaternion, amount: number): Quaternion => {
-  const adjusted = dot4(start, end) < 0 ? end.map((value) => -value) as Quaternion : end;
-  return normalize4(start.map((value, index) => value + (adjusted[index] - value) * amount) as Quaternion);
-};
-
-export function calibrateToReference(
-  changed: BrowserShot,
-  modelBaseline: BrowserShot,
-  reference: BrowserShot,
-  changedCue: SimulationRequest["cue"],
-  baselineCue: NonNullable<SimulationRequest["baselineCue"]>,
-): BrowserShot {
-  const parameterDistance = Math.hypot(
-    (changedCue.x - baselineCue.x) / .5,
-    (changedCue.y - baselineCue.y) / .5,
-    (changedCue.speedMps - baselineCue.speedMps) / 1.5,
-  );
-  const correctionWeight = clamp(1 - parameterDistance * .22, .2, 1);
-  const durationScale = reference.duration / Math.max(.01, modelBaseline.duration);
-  const duration = changed.duration * durationScale;
-  return {
-    ...changed,
-    duration: Number(duration.toFixed(4)),
-    engine: "ブラウザー物理モデル 0.1（基準課題で校正）",
-    trajectories: changed.trajectories.map((trajectory) => {
-      const modelTrajectory = modelBaseline.trajectories.find((candidate) => candidate.ballId === trajectory.ballId);
-      const referenceTrajectory = reference.trajectories.find((candidate) => candidate.ballId === trajectory.ballId);
-      if (!modelTrajectory || !referenceTrajectory) return trajectory;
-      return {
-        ...trajectory,
-        points: trajectory.points.map((point) => {
-          const normalizedTime = point.t / Math.max(.01, changed.duration);
-          const modelPoint = interpolateTrajectory(modelTrajectory.points, normalizedTime);
-          const referencePoint = interpolateTrajectory(referenceTrajectory.points, normalizedTime);
-          if (point.visible === false) return { ...point, t: Number((point.t * durationScale).toFixed(4)) };
-          // A reference correction must never create motion that the simulated
-          // shot has not caused yet. In particular, a slower draw shot may hit
-          // the object ball later than the authored baseline.
-          const initialPoint = trajectory.points[0];
-          const rawBallIsStill = Math.hypot(point.x - initialPoint.x, point.y - initialPoint.y) < 1e-5;
-          if (rawBallIsStill) {
-            return {
-              ...point,
-              t: Number((point.t * durationScale).toFixed(4)),
-            };
-          }
-          const correctedQ = multiplyQuaternion(multiplyQuaternion(referencePoint.q, inverseQuaternion(modelPoint.q)), point.q);
-          return {
-            ...point,
-            t: Number((point.t * durationScale).toFixed(4)),
-            x: Number((point.x + (referencePoint.x - modelPoint.x) * correctionWeight).toFixed(4)),
-            y: Number((point.y + (referencePoint.y - modelPoint.y) * correctionWeight).toFixed(4)),
-            q: blendQuaternion(point.q, correctedQ, correctionWeight).map((value) => Number(value.toFixed(6))) as Quaternion,
-          };
-        }),
-      };
-    }),
   };
 }

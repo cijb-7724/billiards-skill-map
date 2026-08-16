@@ -396,8 +396,6 @@ export default function Home() {
         balls: authored.balls.map((ball) => ({ id: ball.id, color: ball.color, x: ball.x, y: ball.y })),
         aimPoint,
         cue: { ...experiment, elevationDeg: authored.cue.elevationDeg },
-        baselineCue: { x: authored.cue.x, y: authored.cue.y, speedMps: authored.cue.speedMps, elevationDeg: authored.cue.elevationDeg },
-        referenceShot: baselineShot,
       };
       workerRef.current?.postMessage(request);
     }, 180);
@@ -478,6 +476,7 @@ export default function Home() {
               </div>
             </div>
             <div className="viewer-labels"><span className="cb-key">手玉</span><span className="ob-key">的玉</span><span className="zone-key">合格領域</span><span className="pocket-key">指定ポケット</span><span className="grid-key">配置図は0.25目盛</span></div>
+            <div className="expanded-cue-point"><CuePoint x={experiment.x} y={experiment.y} /><span>現在の撞点</span></div>
             {view === "diagram" ? (
               <TableCanvas drill={drill} time={time} baselineTrajectories={baselineShot.trajectories} showBaseline={!isDefault && showBaseline} />
             ) : (

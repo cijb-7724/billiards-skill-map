@@ -1,8 +1,8 @@
 import drills from "../app/drills.json";
-import references from "../app/generatedTrajectories.json";
-import { calibrateToReference, simulateBrowserShot, type BrowserShot, type SimulationRequest } from "../app/physics";
+import { simulateBrowserShot, type BrowserShot, type SimulationRequest } from "../app/physics";
 
 const BALL_RADIUS_DIAMOND = .09;
+const POCKETS = [[0, 0], [4, 0], [8, 0], [0, 4], [4, 4], [8, 4]];
 
 function aimPoint(drill: (typeof drills.drills)[number]) {
   const cueBall = drill.balls.find((ball) => ball.id === "CB")!;
@@ -22,9 +22,44 @@ function aimPoint(drill: (typeof drills.drills)[number]) {
   return { x: moved.x, y: moved.y };
 }
 
-const referenceMap = references as unknown as Record<string, BrowserShot>;
 const errors: string[] = [];
 let slowest = 0;
+
+function validateShot(drillId: string, label: string, shot: BrowserShot) {
+  slowest = Math.max(slowest, shot.calculationMs ?? 0);
+  for (const trajectory of shot.trajectories) {
+    for (const point of trajectory.points) {
+      if (![point.t, point.x, point.y, ...point.q].every(Number.isFinite)) errors.push(`${drillId} ${label}: 軌道に不正な数値があります`);
+      if (point.x < -.5 || point.x > 8.5 || point.y < -.5 || point.y > 4.5) errors.push(`${drillId} ${label}: 軌道が台から大きく逸脱しています`);
+      const quaternionNorm = Math.hypot(...point.q);
+      if (Math.abs(quaternionNorm - 1) > 2e-4) errors.push(`${drillId} ${label}: 回転姿勢が正規化されていません`);
+    }
+
+    let previousDirection: [number, number] | null = null;
+    for (let index = 1; index < trajectory.points.length; index++) {
+      const previous = trajectory.points[index - 1];
+      const current = trajectory.points[index];
+      if (previous.visible === false || current.visible === false) continue;
+      const dx = current.x - previous.x;
+      const dy = current.y - previous.y;
+      const distance = Math.hypot(dx, dy);
+      if (distance < 2e-4) continue;
+      const direction: [number, number] = [dx / distance, dy / distance];
+      const awayFromRail = current.x > .22 && current.x < 7.78 && current.y > .22 && current.y < 3.78;
+      if (trajectory.ballId !== "CB" && awayFromRail && previousDirection && direction[0] * previousDirection[0] + direction[1] * previousDirection[1] < -.25) {
+        errors.push(`${drillId} ${label}: 無接触区間で進行方向が反転しています`);
+      }
+      previousDirection = direction;
+    }
+
+    const firstHidden = trajectory.points.findIndex((point) => point.visible === false);
+    if (firstHidden > 0) {
+      const previous = trajectory.points[firstHidden - 1];
+      const nearestPocket = Math.min(...POCKETS.map(([x, y]) => Math.hypot(previous.x - x, previous.y - y)));
+      if (nearestPocket > .38) errors.push(`${drillId} ${label}: ポケットから離れた位置で球が消えています`);
+    }
+  }
+}
 
 for (const drill of drills.drills) {
   const baselineCue = {
@@ -39,54 +74,17 @@ for (const drill of drills.drills) {
     aimPoint: aimPoint(drill),
     cue: baselineCue,
   };
-  const modelBaseline = simulateBrowserShot(request);
-  slowest = Math.max(slowest, modelBaseline.calculationMs ?? 0);
-  const reference = referenceMap[drill.id];
-  const calibrated = calibrateToReference(modelBaseline, modelBaseline, reference, baselineCue, baselineCue);
-  for (const trajectory of calibrated.trajectories) {
-    const expected = reference.trajectories.find((candidate) => candidate.ballId === trajectory.ballId)!;
-    const actualFinal = trajectory.points.at(-1)!;
-    const expectedFinal = expected.points.at(-1)!;
-    if (Math.hypot(actualFinal.x - expectedFinal.x, actualFinal.y - expectedFinal.y) > 1e-3) {
-      errors.push(`${drill.id}: 基準校正後の最終位置が一致しません`);
-    }
-  }
-  const changedCue = {
-    ...baselineCue,
-    x: Math.max(-.8, Math.min(.8, baselineCue.x + .05)),
-    speedMps: Math.min(3.5, baselineCue.speedMps + .05),
-  };
-  const changed = simulateBrowserShot({ ...request, cue: changedCue });
-  slowest = Math.max(slowest, changed.calculationMs ?? 0);
-  const adjusted = calibrateToReference(changed, modelBaseline, reference, changedCue, baselineCue);
-  for (const trajectory of adjusted.trajectories) {
-    for (const point of trajectory.points) {
-      if (![point.t, point.x, point.y, ...point.q].every(Number.isFinite)) errors.push(`${drill.id}: 実験結果に不正な数値があります`);
-      if (point.x < -.5 || point.x > 8.5 || point.y < -.5 || point.y > 4.5) errors.push(`${drill.id}: 実験軌道が台から大きく逸脱しています`);
-      const quaternionNorm = Math.hypot(...point.q);
-      if (Math.abs(quaternionNorm - 1) > 2e-4) errors.push(`${drill.id}: 回転姿勢が正規化されていません`);
-    }
-  }
-
-  const slowDrawCue = { ...baselineCue, y: -.8, speedMps: .5 };
-  const slowDraw = simulateBrowserShot({ ...request, cue: slowDrawCue });
-  const calibratedSlowDraw = calibrateToReference(slowDraw, modelBaseline, reference, slowDrawCue, baselineCue);
-  for (const rawTrajectory of slowDraw.trajectories.filter((trajectory) => trajectory.ballId !== "CB")) {
-    const calibratedTrajectory = calibratedSlowDraw.trajectories.find((trajectory) => trajectory.ballId === rawTrajectory.ballId)!;
-    const initial = rawTrajectory.points[0];
-    rawTrajectory.points.forEach((rawPoint, index) => {
-      const rawIsStill = Math.hypot(rawPoint.x - initial.x, rawPoint.y - initial.y) < 1e-5;
-      const calibratedPoint = calibratedTrajectory.points[index];
-      if (rawIsStill && Math.hypot(calibratedPoint.x - initial.x, calibratedPoint.y - initial.y) >= 1e-5) {
-        errors.push(`${drill.id}: 衝突前に的玉が動いています`);
-      }
-    });
-  }
+  validateShot(drill.id, "基準", simulateBrowserShot(request));
+  validateShot(drill.id, "微調整", simulateBrowserShot({
+    ...request,
+    cue: { ...baselineCue, x: Math.max(-.8, Math.min(.8, baselineCue.x + .05)), speedMps: Math.min(3.5, baselineCue.speedMps + .05) },
+  }));
+  validateShot(drill.id, "弱い引き", simulateBrowserShot({ ...request, cue: { ...baselineCue, y: -.8, speedMps: .5 } }));
 }
 
 if (errors.length) {
   console.error([...new Set(errors)].join("\n"));
   process.exitCode = 1;
 } else {
-  console.log(`ブラウザー物理検証: ${drills.drills.length}/${drills.drills.length} 課題が合格（最長 ${slowest.toFixed(2)} ms）`);
+  console.log(`ブラウザー物理検証: ${drills.drills.length}/${drills.drills.length} 課題 × 3条件が合格（最長 ${slowest.toFixed(2)} ms）`);
 }
