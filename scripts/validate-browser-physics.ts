@@ -67,6 +67,21 @@ for (const drill of drills.drills) {
       if (Math.abs(quaternionNorm - 1) > 2e-4) errors.push(`${drill.id}: 回転姿勢が正規化されていません`);
     }
   }
+
+  const slowDrawCue = { ...baselineCue, y: -.8, speedMps: .5 };
+  const slowDraw = simulateBrowserShot({ ...request, cue: slowDrawCue });
+  const calibratedSlowDraw = calibrateToReference(slowDraw, modelBaseline, reference, slowDrawCue, baselineCue);
+  for (const rawTrajectory of slowDraw.trajectories.filter((trajectory) => trajectory.ballId !== "CB")) {
+    const calibratedTrajectory = calibratedSlowDraw.trajectories.find((trajectory) => trajectory.ballId === rawTrajectory.ballId)!;
+    const initial = rawTrajectory.points[0];
+    rawTrajectory.points.forEach((rawPoint, index) => {
+      const rawIsStill = Math.hypot(rawPoint.x - initial.x, rawPoint.y - initial.y) < 1e-5;
+      const calibratedPoint = calibratedTrajectory.points[index];
+      if (rawIsStill && Math.hypot(calibratedPoint.x - initial.x, calibratedPoint.y - initial.y) >= 1e-5) {
+        errors.push(`${drill.id}: 衝突前に的玉が動いています`);
+      }
+    });
+  }
 }
 
 if (errors.length) {

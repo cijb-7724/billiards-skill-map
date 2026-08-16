@@ -33,6 +33,17 @@ function interpolateQuaternion(start: Quaternion, end: Quaternion, ratio: number
   return normalizeQuaternion(start.map((value, index) => value + (adjustedEnd[index] - value) * ratio) as Quaternion);
 }
 
+function rotateVector([w, x, y, z]: Quaternion, [vx, vy, vz]: [number, number, number]): [number, number, number] {
+  const tx = 2 * (y * vz - z * vy);
+  const ty = 2 * (z * vx - x * vz);
+  const tz = 2 * (x * vy - y * vx);
+  return [
+    vx + w * tx + (y * tz - z * ty),
+    vy + w * ty + (z * tx - x * tz),
+    vz + w * tz + (x * ty - y * tx),
+  ];
+}
+
 function interpolate(points: Point[], time: number): Point {
   if (time <= points[0].t) return points[0];
   if (time >= points[points.length - 1].t) return points[points.length - 1];
@@ -189,6 +200,11 @@ function TableCanvas({
       context.setLineDash([]);
     });
 
+    const surfaceMarkers: [number, number, number][] = [
+      [0, 0, 1], [.86, 0, .5], [-.86, 0, .5], [0, .86, .5], [0, -.86, .5],
+      [.86, 0, -.5], [-.86, 0, -.5], [0, .86, -.5], [0, -.86, -.5], [0, 0, -1],
+    ];
+
     (drill.balls as Ball[]).forEach((ball) => {
       const trajectory = (drill.trajectories as Trajectory[]).find((item) => item.ballId === ball.id);
       const position: Point = trajectory ? interpolate(trajectory.points, time) : { ...ball, t: 0, q: IDENTITY_QUATERNION };
@@ -203,6 +219,18 @@ function TableCanvas({
       context.strokeStyle = ball.id === "CB" ? "#b7bcb7" : "#b1851e"; context.lineWidth = 1.2; context.stroke();
       context.beginPath(); context.arc(px - ballR * .28, py - ballR * .3, ballR * .24, 0, Math.PI * 2);
       context.fillStyle = "rgba(255,255,255,.35)"; context.fill();
+
+      const orientation = position.q ?? IDENTITY_QUATERNION;
+      surfaceMarkers.map((marker) => rotateVector(orientation, marker))
+        .filter((marker) => marker[2] > -.08)
+        .sort((a, b) => a[2] - b[2])
+        .forEach(([worldX, worldY, worldZ]) => {
+          const mx = px + worldY * ballR * .72;
+          const my = py + worldX * ballR * .72;
+          const markerRadius = Math.max(1.35, ballR * (.095 + Math.max(0, worldZ) * .035));
+          context.beginPath(); context.arc(mx, my, markerRadius, 0, Math.PI * 2);
+          context.fillStyle = ball.id === "CB" ? "#c83f35" : "rgba(255,255,248,.92)"; context.fill();
+        });
 
       if (ball.id !== "CB") {
         context.fillStyle = "#523e0e";
@@ -280,16 +308,6 @@ function getAimPoint(drill: Drill): { x: number; y: number } {
   return { x: moved.x, y: moved.y };
 }
 
-function sideLabel(value: number) {
-  if (Math.abs(value) < .01) return "中央";
-  return `${value > 0 ? "右" : "左"}${Math.abs(value).toFixed(2)}`;
-}
-
-function verticalLabel(value: number) {
-  if (Math.abs(value) < .01) return "中央";
-  return `${value > 0 ? "上" : "下"}${Math.abs(value).toFixed(2)}`;
-}
-
 function evaluateExperiment(drill: Drill, shot: BrowserShot) {
   const objectTrajectory = shot.trajectories.find((trajectory) => trajectory.ballId.startsWith("OB"));
   const targetPocket = POCKETS.find((pocket) => pocket.id === drill.targetPocket);
@@ -313,6 +331,7 @@ export default function Home() {
   const [speed, setSpeed] = useState(1);
   const [filter, setFilter] = useState("すべて");
   const [view, setView] = useState<"overhead" | "player" | "diagram">("overhead");
+  const [viewerExpanded, setViewerExpanded] = useState(false);
   const [showBaseline, setShowBaseline] = useState(true);
   const [experiment, setExperiment] = useState(() => ({
     x: drillData.drills[0].cue.x,
@@ -350,6 +369,18 @@ export default function Home() {
     workerRef.current = worker;
     return () => { worker.terminate(); workerRef.current = null; };
   }, []);
+
+  useEffect(() => {
+    if (!viewerExpanded) return;
+    const previousOverflow = document.body.style.overflow;
+    const closeOnEscape = (event: KeyboardEvent) => { if (event.key === "Escape") setViewerExpanded(false); };
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [viewerExpanded]);
 
   useEffect(() => {
     if (isDefault) { requestIdRef.current += 1; setExperimentalShot(null); setCalculating(false); return; }
@@ -434,14 +465,17 @@ export default function Home() {
             <div className="pass-badge"><small>進級基準</small><strong>{drill.pass.required}/{drill.pass.attempts}</strong><span>× {drill.pass.sessions}回</span></div>
           </div>
 
-          <div className="viewer-card">
+          <div className={`viewer-card ${viewerExpanded ? "expanded" : ""}`}>
             <div className="view-toolbar">
               <div className="view-tabs" role="group" aria-label="視点を選択">
                 <button className={view === "overhead" ? "active" : ""} onClick={() => setView("overhead")}>3D俯瞰</button>
                 <button className={view === "player" ? "active" : ""} onClick={() => setView("player")}>3Dプレイヤー</button>
                 <button className={view === "diagram" ? "active" : ""} onClick={() => setView("diagram")}>配置図</button>
               </div>
-              {!isDefault && <label className="baseline-toggle"><input type="checkbox" checked={showBaseline} onChange={(event) => setShowBaseline(event.target.checked)} /> 基準軌道を重ねる</label>}
+              <div className="viewer-actions">
+                {!isDefault && <label className="baseline-toggle"><input type="checkbox" checked={showBaseline} onChange={(event) => setShowBaseline(event.target.checked)} /> 基準軌道を重ねる</label>}
+                <button className="expand-viewer" onClick={() => setViewerExpanded((current) => !current)}>{viewerExpanded ? "閉じる" : "拡大表示"}</button>
+              </div>
             </div>
             <div className="viewer-labels"><span className="cb-key">手玉</span><span className="ob-key">的玉</span><span className="zone-key">合格領域</span><span className="pocket-key">指定ポケット</span><span className="grid-key">配置図は0.25目盛</span></div>
             {view === "diagram" ? (
@@ -470,22 +504,19 @@ export default function Home() {
 
           <section className="experiment-panel" aria-labelledby="experiment-title">
             <div className="experiment-heading">
-              <div><span>その場で再計算</span><h2 id="experiment-title">撞点と強さを変えて比較</h2><p>円内の赤点を動かすか、数値スライダーで微調整できます。変更結果はこのページを開いている間だけ保持します。</p></div>
+              <div><span>その場で再計算</span><h2 id="experiment-title">撞点と強さを変えて比較</h2></div>
               <div className={`experiment-status ${calculating ? "calculating" : ""}`}><i />{calculating ? "計算中" : isDefault ? "課題の基準設定" : evaluateExperiment(authored, activeShot)}</div>
             </div>
             <div className="experiment-controls">
               <div className="cue-control-wrap">
                 <CueController x={experiment.x} y={experiment.y} onChange={(x, y) => setExperiment((current) => ({ ...current, x, y }))} />
-                <div className="cue-values"><span>左右 <b>{sideLabel(experiment.x)}</b></span><span>上下 <b>{verticalLabel(experiment.y)}</b></span></div>
               </div>
-              <div className="parameter-sliders">
-                <label><span>強さ <b>{experiment.speedMps.toFixed(2)}</b></span><input type="range" min="0.5" max="3.5" step="0.05" value={experiment.speedMps} onChange={(event) => setExperiment((current) => ({ ...current, speedMps: Number(event.target.value) }))} /></label>
-                <label><span>左右の撞点 <b>{sideLabel(experiment.x)}</b></span><input type="range" min="-0.8" max="0.8" step="0.05" value={experiment.x} onChange={(event) => setExperiment((current) => ({ ...current, x: Number(event.target.value) }))} /></label>
-                <label><span>上下の撞点 <b>{verticalLabel(experiment.y)}</b></span><input type="range" min="-0.8" max="0.8" step="0.05" value={experiment.y} onChange={(event) => setExperiment((current) => ({ ...current, y: Number(event.target.value) }))} /></label>
+              <div className="strength-control">
+                <label htmlFor="shot-strength">ショットの強さ</label>
+                <div><span>弱い</span><input id="shot-strength" type="range" min="0.5" max="3.5" step="0.05" value={experiment.speedMps} onChange={(event) => setExperiment((current) => ({ ...current, speedMps: Number(event.target.value) }))} /><span>強い</span></div>
               </div>
               <div className="experiment-actions">
                 <button onClick={() => setExperiment({ x: authored.cue.x, y: authored.cue.y, speedMps: authored.cue.speedMps })}>課題設定に戻す</button>
-                <small>保存なし・最大20結果だけ一時保持</small>
               </div>
             </div>
           </section>

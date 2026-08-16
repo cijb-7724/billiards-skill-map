@@ -444,6 +444,17 @@ export function calibrateToReference(
           const modelPoint = interpolateTrajectory(modelTrajectory.points, normalizedTime);
           const referencePoint = interpolateTrajectory(referenceTrajectory.points, normalizedTime);
           if (point.visible === false) return { ...point, t: Number((point.t * durationScale).toFixed(4)) };
+          // A reference correction must never create motion that the simulated
+          // shot has not caused yet. In particular, a slower draw shot may hit
+          // the object ball later than the authored baseline.
+          const initialPoint = trajectory.points[0];
+          const rawBallIsStill = Math.hypot(point.x - initialPoint.x, point.y - initialPoint.y) < 1e-5;
+          if (rawBallIsStill) {
+            return {
+              ...point,
+              t: Number((point.t * durationScale).toFixed(4)),
+            };
+          }
           const correctedQ = multiplyQuaternion(multiplyQuaternion(referencePoint.q, inverseQuaternion(modelPoint.q)), point.q);
           return {
             ...point,

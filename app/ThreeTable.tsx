@@ -69,13 +69,82 @@ function poolQuaternionToThree([w, x, y, z]: Quaternion) {
 function addTrajectory(scene: THREE.Scene, trajectory: ShotTrajectory, color: string, opacity: number) {
   const visiblePoints = trajectory.points.filter((point) => point.visible !== false);
   if (visiblePoints.length < 2) return;
-  const geometry = new THREE.BufferGeometry().setFromPoints(visiblePoints.map((point) => (
-    new THREE.Vector3(point.x * DIAMOND_M, .009, point.y * DIAMOND_M)
-  )));
-  const material = new THREE.LineDashedMaterial({ color, transparent: true, opacity, dashSize: .042, gapSize: .025 });
-  const line = new THREE.Line(geometry, material);
-  line.computeLineDistances();
-  scene.add(line);
+  const sampled = visiblePoints.filter((point, index, points) => {
+    if (index === 0 || index === points.length - 1) return true;
+    if (index % 3 !== 0) return false;
+    const previous = points[index - 1];
+    return Math.hypot(point.x - previous.x, point.y - previous.y) > 1e-5;
+  }).filter((point, index, points) => {
+    if (index === 0) return true;
+    const previous = points[index - 1];
+    return Math.hypot(point.x - previous.x, point.y - previous.y) > 1e-5;
+  });
+  if (sampled.length < 2) return;
+  const path = new THREE.CurvePath<THREE.Vector3>();
+  for (let index = 1; index < sampled.length; index++) {
+    const previous = sampled[index - 1];
+    const current = sampled[index];
+    path.add(new THREE.LineCurve3(
+      new THREE.Vector3(previous.x * DIAMOND_M, .012, previous.y * DIAMOND_M),
+      new THREE.Vector3(current.x * DIAMOND_M, .012, current.y * DIAMOND_M),
+    ));
+  }
+  const geometry = new THREE.TubeGeometry(path, Math.max(8, sampled.length * 2), opacity < .4 ? .0018 : .0034, 5, false);
+  const material = new THREE.MeshBasicMaterial({ color, transparent: true, opacity, depthWrite: false });
+  scene.add(new THREE.Mesh(geometry, material));
+}
+
+function makeWoodMaterial() {
+  const canvas = document.createElement("canvas");
+  canvas.width = 512;
+  canvas.height = 128;
+  const context = canvas.getContext("2d")!;
+  const gradient = context.createLinearGradient(0, 0, 0, 128);
+  gradient.addColorStop(0, "#9b653b");
+  gradient.addColorStop(.48, "#704124");
+  gradient.addColorStop(1, "#4c2a19");
+  context.fillStyle = gradient;
+  context.fillRect(0, 0, 512, 128);
+  for (let line = 0; line < 34; line++) {
+    const y = 4 + line * 3.7;
+    context.beginPath();
+    for (let x = 0; x <= 512; x += 8) {
+      const offset = Math.sin(x * .031 + line * 1.73) * (1.2 + (line % 4) * .35);
+      if (x === 0) context.moveTo(x, y + offset);
+      else context.lineTo(x, y + offset);
+    }
+    context.strokeStyle = line % 3 === 0 ? "rgba(42,19,8,.28)" : "rgba(255,210,145,.1)";
+    context.lineWidth = line % 5 === 0 ? 1.4 : .7;
+    context.stroke();
+  }
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+  texture.repeat.set(2.5, 1);
+  return new THREE.MeshPhysicalMaterial({ map: texture, color: 0xffffff, roughness: .38, clearcoat: .38, clearcoatRoughness: .28 });
+}
+
+function makeClothMaterial() {
+  const canvas = document.createElement("canvas");
+  canvas.width = 128;
+  canvas.height = 128;
+  const context = canvas.getContext("2d")!;
+  context.fillStyle = "#168967";
+  context.fillRect(0, 0, 128, 128);
+  for (let y = 0; y < 128; y += 2) {
+    context.strokeStyle = y % 4 === 0 ? "rgba(255,255,255,.028)" : "rgba(0,28,19,.03)";
+    context.beginPath();
+    context.moveTo(0, y + .5);
+    context.lineTo(128, y + .5);
+    context.stroke();
+  }
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+  texture.repeat.set(10, 5);
+  return new THREE.MeshStandardMaterial({ map: texture, color: 0xffffff, roughness: .96 });
 }
 
 function makeDiscMaterial(label: string, foreground: string, background: string) {
@@ -143,10 +212,11 @@ function createBall(ball: ThreeDrill["balls"][number]) {
 }
 
 function addTable(scene: THREE.Scene, drill: ThreeDrill) {
-  const wood = new THREE.MeshStandardMaterial({ color: 0x6c3f27, roughness: .46, metalness: .03 });
-  const darkWood = new THREE.MeshStandardMaterial({ color: 0x302017, roughness: .62 });
-  const cushion = new THREE.MeshStandardMaterial({ color: 0x0b604b, roughness: .78 });
-  const cloth = new THREE.MeshStandardMaterial({ color: 0x12725a, roughness: .88 });
+  const wood = makeWoodMaterial();
+  const darkWood = new THREE.MeshStandardMaterial({ color: 0x27180f, roughness: .58, metalness: .02 });
+  const cushion = new THREE.MeshStandardMaterial({ color: 0x0d6e54, roughness: .72 });
+  const cloth = makeClothMaterial();
+  const trim = new THREE.MeshStandardMaterial({ color: 0xb89054, roughness: .32, metalness: .46 });
 
   const apron = new THREE.Mesh(new THREE.BoxGeometry(TABLE_LENGTH + .25, .095, TABLE_WIDTH + .25), darkWood);
   apron.position.set(TABLE_LENGTH / 2, -.055, TABLE_WIDTH / 2);
@@ -159,32 +229,63 @@ function addTable(scene: THREE.Scene, drill: ThreeDrill) {
   bed.receiveShadow = true;
   scene.add(bed);
 
-  const railHeight = .07;
+  const railHeight = .074;
   const railWidth = .105;
-  const rails = [
-    { size: [TABLE_LENGTH + railWidth * 2, railHeight, railWidth], position: [TABLE_LENGTH / 2, railHeight / 2, -railWidth / 2] },
-    { size: [TABLE_LENGTH + railWidth * 2, railHeight, railWidth], position: [TABLE_LENGTH / 2, railHeight / 2, TABLE_WIDTH + railWidth / 2] },
-    { size: [railWidth, railHeight, TABLE_WIDTH], position: [-railWidth / 2, railHeight / 2, TABLE_WIDTH / 2] },
-    { size: [railWidth, railHeight, TABLE_WIDTH], position: [TABLE_LENGTH + railWidth / 2, railHeight / 2, TABLE_WIDTH / 2] },
-  ];
+  const cornerGap = .115;
+  const sideGap = .105;
+  const longRailSpans = [[cornerGap, TABLE_LENGTH / 2 - sideGap], [TABLE_LENGTH / 2 + sideGap, TABLE_LENGTH - cornerGap]];
+  const shortRailSpans = [[cornerGap, TABLE_WIDTH - cornerGap]];
+  const rails: Array<{ size: [number, number, number]; position: [number, number, number] }> = [];
+  longRailSpans.forEach(([start, end]) => {
+    [-railWidth / 2, TABLE_WIDTH + railWidth / 2].forEach((z) => rails.push({
+      size: [end - start, railHeight, railWidth], position: [(start + end) / 2, railHeight / 2, z],
+    }));
+  });
+  shortRailSpans.forEach(([start, end]) => {
+    [-railWidth / 2, TABLE_LENGTH + railWidth / 2].forEach((x) => rails.push({
+      size: [railWidth, railHeight, end - start], position: [x, railHeight / 2, (start + end) / 2],
+    }));
+  });
   rails.forEach((rail) => {
-    const mesh = new THREE.Mesh(new THREE.BoxGeometry(...rail.size as [number, number, number]), wood);
-    mesh.position.set(...rail.position as [number, number, number]);
+    const mesh = new THREE.Mesh(new THREE.BoxGeometry(...rail.size), wood);
+    mesh.position.set(...rail.position);
     mesh.castShadow = true;
     mesh.receiveShadow = true;
     scene.add(mesh);
   });
 
+  const trimHeight = .008;
+  longRailSpans.forEach(([start, end]) => {
+    [-railWidth + .012, TABLE_WIDTH + railWidth - .012].forEach((z) => {
+      const band = new THREE.Mesh(new THREE.BoxGeometry(end - start, trimHeight, .009), trim);
+      band.position.set((start + end) / 2, railHeight + .002, z);
+      scene.add(band);
+    });
+  });
+  shortRailSpans.forEach(([start, end]) => {
+    [-railWidth + .012, TABLE_LENGTH + railWidth - .012].forEach((x) => {
+      const band = new THREE.Mesh(new THREE.BoxGeometry(.009, trimHeight, end - start), trim);
+      band.position.set(x, railHeight + .002, (start + end) / 2);
+      scene.add(band);
+    });
+  });
+
   const cushionHeight = .042;
   const cushionWidth = .035;
-  [
-    { size: [TABLE_LENGTH, cushionHeight, cushionWidth], position: [TABLE_LENGTH / 2, cushionHeight / 2, cushionWidth / 2] },
-    { size: [TABLE_LENGTH, cushionHeight, cushionWidth], position: [TABLE_LENGTH / 2, cushionHeight / 2, TABLE_WIDTH - cushionWidth / 2] },
-    { size: [cushionWidth, cushionHeight, TABLE_WIDTH], position: [cushionWidth / 2, cushionHeight / 2, TABLE_WIDTH / 2] },
-    { size: [cushionWidth, cushionHeight, TABLE_WIDTH], position: [TABLE_LENGTH - cushionWidth / 2, cushionHeight / 2, TABLE_WIDTH / 2] },
-  ].forEach((part) => {
-    const mesh = new THREE.Mesh(new THREE.BoxGeometry(...part.size as [number, number, number]), cushion);
-    mesh.position.set(...part.position as [number, number, number]);
+  const cushionParts: Array<{ size: [number, number, number]; position: [number, number, number] }> = [];
+  longRailSpans.forEach(([start, end]) => {
+    [cushionWidth / 2, TABLE_WIDTH - cushionWidth / 2].forEach((z) => cushionParts.push({
+      size: [end - start, cushionHeight, cushionWidth], position: [(start + end) / 2, cushionHeight / 2, z],
+    }));
+  });
+  shortRailSpans.forEach(([start, end]) => {
+    [cushionWidth / 2, TABLE_LENGTH - cushionWidth / 2].forEach((x) => cushionParts.push({
+      size: [cushionWidth, cushionHeight, end - start], position: [x, cushionHeight / 2, (start + end) / 2],
+    }));
+  });
+  cushionParts.forEach((part) => {
+    const mesh = new THREE.Mesh(new THREE.BoxGeometry(...part.size), cushion);
+    mesh.position.set(...part.position);
     mesh.castShadow = true;
     scene.add(mesh);
   });
@@ -219,15 +320,17 @@ function addTable(scene: THREE.Scene, drill: ThreeDrill) {
     });
   }
 
-  const pocketMaterial = new THREE.MeshStandardMaterial({ color: 0x030705, roughness: 1 });
-  const rimMaterial = new THREE.MeshStandardMaterial({ color: 0x1b1713, roughness: .82 });
+  const pocketMaterial = new THREE.MeshStandardMaterial({ color: 0x020302, roughness: 1 });
+  const rimMaterial = new THREE.MeshStandardMaterial({ color: 0x16100c, roughness: .75, metalness: .08 });
   POCKETS.forEach((pocketPosition) => {
-    const pocket = new THREE.Mesh(new THREE.CylinderGeometry(.066, .06, .025, 40), pocketMaterial);
-    pocket.position.set(pocketPosition.x, .01, pocketPosition.z);
+    const isSide = pocketPosition.x === TABLE_LENGTH / 2;
+    const pocketRadius = isSide ? .067 : .075;
+    const pocket = new THREE.Mesh(new THREE.CylinderGeometry(pocketRadius, pocketRadius * .84, .04, 48), pocketMaterial);
+    pocket.position.set(pocketPosition.x, -.002, pocketPosition.z);
     scene.add(pocket);
-    const rim = new THREE.Mesh(new THREE.TorusGeometry(.065, .009, 8, 36), rimMaterial);
+    const rim = new THREE.Mesh(new THREE.TorusGeometry(pocketRadius, .009, 10, 48), rimMaterial);
     rim.rotation.x = Math.PI / 2;
-    rim.position.set(pocketPosition.x, .027, pocketPosition.z);
+    rim.position.set(pocketPosition.x, .019, pocketPosition.z);
     scene.add(rim);
     if (pocketPosition.id === drill.targetPocket) {
       const target = new THREE.Mesh(
@@ -316,17 +419,16 @@ export function ThreeTable({
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.08;
+    renderer.toneMappingExposure = 1.34;
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x091712);
-    scene.fog = new THREE.FogExp2(0x091712, .28);
-    const camera = new THREE.PerspectiveCamera(viewMode === "player" ? 45 : 38, 2, .01, 10);
+    scene.background = new THREE.Color(0x263b34);
+    const camera = new THREE.PerspectiveCamera(viewMode === "player" ? 45 : 30, 2, .01, 10);
 
-    scene.add(new THREE.HemisphereLight(0xfff4dc, 0x102d24, 1.75));
-    const keyLight = new THREE.DirectionalLight(0xfff0cf, 3.4);
+    scene.add(new THREE.HemisphereLight(0xfff7e9, 0x37564b, 2.45));
+    const keyLight = new THREE.DirectionalLight(0xfff3db, 4.2);
     keyLight.position.set(.35, 2.7, 1.65);
     keyLight.castShadow = true;
     keyLight.shadow.mapSize.set(2048, 2048);
@@ -335,13 +437,13 @@ export function ThreeTable({
     keyLight.shadow.camera.top = 2;
     keyLight.shadow.camera.bottom = -2;
     scene.add(keyLight);
-    const fillLight = new THREE.PointLight(0x73b6ff, .75, 5);
+    const fillLight = new THREE.PointLight(0x9fd5ff, 1.15, 5);
     fillLight.position.set(2.7, 1.2, -.5);
     scene.add(fillLight);
 
     const room = new THREE.Mesh(
       new THREE.PlaneGeometry(8, 6),
-      new THREE.MeshStandardMaterial({ color: 0x0d1b17, roughness: 1 }),
+      new THREE.MeshStandardMaterial({ color: 0x22332e, roughness: 1 }),
     );
     room.rotation.x = -Math.PI / 2;
     room.position.set(TABLE_LENGTH / 2, -.108, TABLE_WIDTH / 2);
@@ -350,8 +452,8 @@ export function ThreeTable({
 
     addTable(scene, drill);
     if (drill.successZone) addSuccessZone(scene, drill.successZone);
-    if (showBaseline) baselineTrajectories.forEach((trajectory) => addTrajectory(scene, trajectory, "#d7ddd9", .24));
-    trajectories.forEach((trajectory) => addTrajectory(scene, trajectory, trajectory.ballId === "CB" ? "#fff7e2" : "#ffd34f", .72));
+    if (showBaseline) baselineTrajectories.forEach((trajectory) => addTrajectory(scene, trajectory, "#d7ddd9", .28));
+    trajectories.forEach((trajectory) => addTrajectory(scene, trajectory, trajectory.ballId === "CB" ? "#ffffff" : "#ffe066", .92));
 
     const groups = new Map<string, THREE.Group>();
     drill.balls.forEach((ball) => {
@@ -394,7 +496,8 @@ export function ThreeTable({
       camera.position.copy(cbPosition).addScaledVector(aimDirection, -.72).add(new THREE.Vector3(0, .32, 0));
       camera.lookAt(cbPosition.clone().addScaledVector(aimDirection, .88).add(new THREE.Vector3(0, -.01, 0)));
     } else {
-      camera.position.set(TABLE_LENGTH / 2, 2.6, TABLE_WIDTH * 1.92);
+      camera.up.set(0, 0, -1);
+      camera.position.set(TABLE_LENGTH / 2, 3.05, TABLE_WIDTH / 2);
       camera.lookAt(TABLE_LENGTH / 2, 0, TABLE_WIDTH / 2);
     }
 
@@ -442,7 +545,7 @@ export function ThreeTable({
     state.renderer.render(state.scene, state.camera);
   }, [drill.balls, time, trajectories]);
 
-  const label = viewMode === "player" ? "手玉後方のプレイヤー視点" : "立体の台を見渡す3D俯瞰";
+  const label = viewMode === "player" ? "手玉後方のプレイヤー視点" : "台の真上から見る3D俯瞰";
   return (
     <div className={`three-stage ${viewMode}`}>
       <canvas ref={canvasRef} className="three-canvas" aria-label={`${drill.id}の${label}シミュレーション`} />
