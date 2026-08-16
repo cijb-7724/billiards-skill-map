@@ -24,6 +24,7 @@ const DIAMOND_M = 2.54 / 8;
 const TABLE_LENGTH = 2.54;
 const TABLE_WIDTH = 1.27;
 const BALL_RADIUS = 0.028575;
+const POCKET_DROP_SECONDS = .55;
 const UP = new THREE.Vector3(0, 1, 0);
 const POCKETS = [
   { id: "左上", x: 0, z: 0 }, { id: "上中央", x: TABLE_LENGTH / 2, z: 0 },
@@ -626,19 +627,17 @@ export function ThreeTable({
       if (!group || !trajectory) return;
       const point = interpolate(trajectory.points, time);
       const pocketPoint = trajectory.points.find((candidate) => candidate.visible === false);
-      const dropDuration = .2;
-      const dropProgress = pocketPoint && time < pocketPoint.t
-        ? THREE.MathUtils.clamp((time - (pocketPoint.t - dropDuration)) / dropDuration, 0, 1)
-        : 0;
       group.visible = point.visible !== false;
       group.position.set(point.x * DIAMOND_M, BALL_RADIUS, TABLE_WIDTH - point.y * DIAMOND_M);
-      if (dropProgress > 0) {
-        const easedDrop = dropProgress * dropProgress * (3 - 2 * dropProgress);
+      if (pocketPoint && time >= pocketPoint.t && time < pocketPoint.t + POCKET_DROP_SECONDS) {
+        const dropProgress = THREE.MathUtils.clamp((time - pocketPoint.t) / POCKET_DROP_SECONDS, 0, 1);
+        const acceleratedDrop = dropProgress * dropProgress;
         group.visible = true;
-        group.position.y = BALL_RADIUS - easedDrop * BALL_RADIUS * 2.15;
-        group.scale.setScalar(1 - easedDrop * .08);
-      } else {
-        group.scale.setScalar(1);
+        group.position.set(
+          pocketPoint.x * DIAMOND_M,
+          BALL_RADIUS - acceleratedDrop * BALL_RADIUS * 4.8,
+          TABLE_WIDTH - pocketPoint.y * DIAMOND_M,
+        );
       }
       group.quaternion.copy(poolQuaternionToThree(point.q));
     });

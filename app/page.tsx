@@ -15,6 +15,7 @@ type GeneratedShot = BrowserShot;
 type PageKey = "home" | "roadmap" | "exams";
 
 const TABLE = { width: 8, height: 4, ballRadius: 0.09 };
+const POCKET_DROP_SECONDS = .55;
 const POCKETS = [
   { id: "左上", x: 0, y: 4 }, { id: "上中央", x: 4, y: 4 },
   { id: "右上", x: 8, y: 4 }, { id: "左下", x: 0, y: 0 },
@@ -434,7 +435,14 @@ export default function Home() {
     && Math.abs(experiment.y - authored.cue.y) < .001
     && Math.abs(experiment.speedMps - authored.cue.speedMps) < .001;
   const activeShot = isDefault || !experimentalShot ? baselineShot : experimentalShot;
-  const drill = useMemo(() => ({ ...authored, duration: activeShot.duration, trajectories: activeShot.trajectories }) as unknown as Drill, [activeShot, authored]);
+  const displayDuration = useMemo(() => {
+    const pocketAnimationEnds = activeShot.trajectories.flatMap((trajectory) => {
+      const pocketPoint = trajectory.points.find((point) => point.visible === false);
+      return pocketPoint ? [pocketPoint.t + POCKET_DROP_SECONDS] : [];
+    });
+    return Math.max(activeShot.duration, ...pocketAnimationEnds);
+  }, [activeShot]);
+  const drill = useMemo(() => ({ ...authored, duration: displayDuration, trajectories: activeShot.trajectories }) as unknown as Drill, [activeShot.trajectories, authored, displayDuration]);
 
   const selectDrill = (drillId: string) => {
     setPlaying(false);
