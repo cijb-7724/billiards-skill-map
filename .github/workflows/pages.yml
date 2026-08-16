@@ -27,12 +27,8 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-          cache: pip
-      - run: pip install -r requirements.txt
-      - run: python scripts/simulate_drills.py
+      # pooltool で生成・検証した基準軌道はリポジトリに保存済み。
+      # 公開時はブラウザー側の物理検証とビルドだけを再実行する。
       - run: pnpm test
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4
