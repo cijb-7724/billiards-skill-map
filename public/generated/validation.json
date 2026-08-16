@@ -1,0 +1,62 @@
+{
+  "generatedAt": "2026-08-16T17:19:50.680Z",
+  "table": {
+    "width": 8,
+    "height": 4,
+    "radius": 0.09,
+    "pocketMouth": 0.24
+  },
+  "total": 8,
+  "passed": 8,
+  "results": [
+    {
+      "id": "K00-01",
+      "status": "合格",
+      "checks": 7,
+      "errors": []
+    },
+    {
+      "id": "K01-01",
+      "status": "合格",
+      "checks": 7,
+      "errors": []
+    },
+    {
+      "id": "K01-02",
+      "status": "合格",
+      "checks": 7,
+      "errors": []
+    },
+    {
+      "id": "K01-03",
+      "status": "合格",
+      "checks": 7,
+      "errors": []
+    },
+    {
+      "id": "K02-01",
+      "status": "合格",
+      "checks": 7,
+      "errors": []
+    },
+    {
+      "id": "K04-01",
+      "status": "合格",
+      "checks": 7,
+      "errors": []
+    },
+    {
+      "id": "K06-01",
+      "status": "合格",
+      "checks": 7,
+      "errors": []
+    },
+    {
+      "id": "K06-02",
+      "status": "合格",
+      "checks": 7,
+      "errors": []
+    }
+  ],
+  "errors": []
+}

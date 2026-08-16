@@ -1,0 +1,447 @@
+{
+  "engine": "pooltool 0.6.0",
+  "table": {
+    "lengthM": 2.54,
+    "widthM": 1.27
+  },
+  "passed": 8,
+  "total": 8,
+  "results": [
+    {
+      "id": "K00-01",
+      "status": "合格",
+      "failures": [],
+      "physicalDuration": 2.5602,
+      "displayScale": 1.094,
+      "phiDeg": 180.0,
+      "cue": {
+        "speedMps": 1.2,
+        "a": 0,
+        "b": 0,
+        "thetaDeg": 0
+      },
+      "events": [
+        {
+          "type": "none",
+          "time": 0.0
+        },
+        {
+          "type": "stick_ball",
+          "time": 0.0
+        },
+        {
+          "type": "sliding_rolling",
+          "time": 0.2688
+        },
+        {
+          "type": "ball_ball",
+          "time": 0.3123
+        },
+        {
+          "type": "sliding_rolling",
+          "time": 0.4826
+        },
+        {
+          "type": "sliding_rolling",
+          "time": 0.5152
+        },
+        {
+          "type": "ball_pocket",
+          "time": 0.8711
+        },
+        {
+          "type": "ball_pocket",
+          "time": 2.5602
+        },
+        {
+          "type": "none",
+          "time": 2.5602
+        }
+      ]
+    },
+    {
+      "id": "K01-01",
+      "status": "合格",
+      "failures": [],
+      "physicalDuration": 0.7217,
+      "displayScale": 3.88,
+      "phiDeg": 180.0,
+      "cue": {
+        "speedMps": 1.6,
+        "a": 0,
+        "b": -0.35,
+        "thetaDeg": 0
+      },
+      "events": [
+        {
+          "type": "none",
+          "time": 0.0
+        },
+        {
+          "type": "stick_ball",
+          "time": 0.0
+        },
+        {
+          "type": "ball_ball",
+          "time": 0.3036
+        },
+        {
+          "type": "sliding_rolling",
+          "time": 0.3324
+        },
+        {
+          "type": "sliding_rolling",
+          "time": 0.4886
+        },
+        {
+          "type": "rolling_stationary",
+          "time": 0.5543
+        },
+        {
+          "type": "ball_pocket",
+          "time": 0.7217
+        },
+        {
+          "type": "none",
+          "time": 0.7217
+        }
+      ]
+    },
+    {
+      "id": "K01-02",
+      "status": "合格",
+      "failures": [],
+      "physicalDuration": 2.8929,
+      "displayScale": 1.0,
+      "phiDeg": 180.0,
+      "cue": {
+        "speedMps": 0.7,
+        "a": 0,
+        "b": 0.2,
+        "thetaDeg": 0
+      },
+      "events": [
+        {
+          "type": "none",
+          "time": 0.0
+        },
+        {
+          "type": "stick_ball",
+          "time": 0.0
+        },
+        {
+          "type": "sliding_rolling",
+          "time": 0.0728
+        },
+        {
+          "type": "ball_ball",
+          "time": 0.6106
+        },
+        {
+          "type": "sliding_rolling",
+          "time": 0.7095
+        },
+        {
+          "type": "sliding_rolling",
+          "time": 0.7401
+        },
+        {
+          "type": "ball_pocket",
+          "time": 1.4755
+        },
+        {
+          "type": "rolling_stationary",
+          "time": 2.8929
+        },
+        {
+          "type": "none",
+          "time": 2.8929
+        }
+      ]
+    },
+    {
+      "id": "K01-03",
+      "status": "合格",
+      "failures": [],
+      "physicalDuration": 3.1444,
+      "displayScale": 1.0,
+      "phiDeg": 180.0,
+      "cue": {
+        "speedMps": 2.0,
+        "a": 0,
+        "b": -0.55,
+        "thetaDeg": 0
+      },
+      "events": [
+        {
+          "type": "none",
+          "time": 0.0
+        },
+        {
+          "type": "stick_ball",
+          "time": 0.0
+        },
+        {
+          "type": "ball_ball",
+          "time": 0.3142
+        },
+        {
+          "type": "sliding_rolling",
+          "time": 0.4651
+        },
+        {
+          "type": "sliding_rolling",
+          "time": 0.4838
+        },
+        {
+          "type": "ball_pocket",
+          "time": 0.7544
+        },
+        {
+          "type": "rolling_stationary",
+          "time": 3.1444
+        },
+        {
+          "type": "none",
+          "time": 3.1444
+        }
+      ]
+    },
+    {
+      "id": "K02-01",
+      "status": "合格",
+      "failures": [],
+      "physicalDuration": 2.099,
+      "displayScale": 1.334,
+      "phiDeg": 105.985,
+      "cue": {
+        "speedMps": 1.6,
+        "a": 0,
+        "b": -0.28,
+        "thetaDeg": 0
+      },
+      "events": [
+        {
+          "type": "none",
+          "time": 0.0
+        },
+        {
+          "type": "stick_ball",
+          "time": 0.0
+        },
+        {
+          "type": "ball_ball",
+          "time": 0.2922
+        },
+        {
+          "type": "sliding_rolling",
+          "time": 0.3315
+        },
+        {
+          "type": "sliding_rolling",
+          "time": 0.5076
+        },
+        {
+          "type": "ball_linear_cushion",
+          "time": 1.5978
+        },
+        {
+          "type": "ball_pocket",
+          "time": 1.6234
+        },
+        {
+          "type": "rolling_stationary",
+          "time": 2.099
+        },
+        {
+          "type": "none",
+          "time": 2.099
+        }
+      ]
+    },
+    {
+      "id": "K04-01",
+      "status": "合格",
+      "failures": [],
+      "physicalDuration": 7.1332,
+      "displayScale": 1.0,
+      "phiDeg": 139.334,
+      "cue": {
+        "speedMps": 1.6,
+        "a": -0.5,
+        "b": 0,
+        "thetaDeg": 0
+      },
+      "events": [
+        {
+          "type": "none",
+          "time": 0.0
+        },
+        {
+          "type": "stick_ball",
+          "time": 0.0
+        },
+        {
+          "type": "sliding_rolling",
+          "time": 0.2421
+        },
+        {
+          "type": "ball_linear_cushion",
+          "time": 0.9717
+        },
+        {
+          "type": "sliding_rolling",
+          "time": 1.1086
+        },
+        {
+          "type": "ball_linear_cushion",
+          "time": 2.3584
+        },
+        {
+          "type": "sliding_rolling",
+          "time": 2.4666
+        },
+        {
+          "type": "ball_linear_cushion",
+          "time": 3.9235
+        },
+        {
+          "type": "sliding_rolling",
+          "time": 3.9754
+        },
+        {
+          "type": "rolling_stationary",
+          "time": 7.1332
+        },
+        {
+          "type": "none",
+          "time": 7.1332
+        }
+      ]
+    },
+    {
+      "id": "K06-01",
+      "status": "合格",
+      "failures": [],
+      "physicalDuration": 6.749,
+      "displayScale": 1.0,
+      "phiDeg": 139.334,
+      "cue": {
+        "speedMps": 1.6,
+        "a": 0,
+        "b": 0,
+        "thetaDeg": 0
+      },
+      "events": [
+        {
+          "type": "none",
+          "time": 0.0
+        },
+        {
+          "type": "stick_ball",
+          "time": 0.0
+        },
+        {
+          "type": "sliding_rolling",
+          "time": 0.3585
+        },
+        {
+          "type": "ball_linear_cushion",
+          "time": 0.623
+        },
+        {
+          "type": "sliding_rolling",
+          "time": 0.8364
+        },
+        {
+          "type": "ball_linear_cushion",
+          "time": 1.9554
+        },
+        {
+          "type": "sliding_rolling",
+          "time": 2.0644
+        },
+        {
+          "type": "ball_linear_cushion",
+          "time": 2.8303
+        },
+        {
+          "type": "sliding_rolling",
+          "time": 2.8867
+        },
+        {
+          "type": "rolling_stationary",
+          "time": 6.749
+        },
+        {
+          "type": "none",
+          "time": 6.749
+        }
+      ]
+    },
+    {
+      "id": "K06-02",
+      "status": "合格",
+      "failures": [],
+      "physicalDuration": 1.7147,
+      "displayScale": 1.633,
+      "phiDeg": 42.688,
+      "cue": {
+        "speedMps": 2.8,
+        "a": 0,
+        "b": 0,
+        "thetaDeg": 0
+      },
+      "events": [
+        {
+          "type": "none",
+          "time": 0.0
+        },
+        {
+          "type": "stick_ball",
+          "time": 0.0
+        },
+        {
+          "type": "ball_ball",
+          "time": 0.0919
+        },
+        {
+          "type": "sliding_rolling",
+          "time": 0.1191
+        },
+        {
+          "type": "ball_linear_cushion",
+          "time": 0.2493
+        },
+        {
+          "type": "sliding_rolling",
+          "time": 0.5933
+        },
+        {
+          "type": "ball_circular_cushion",
+          "time": 0.9171
+        },
+        {
+          "type": "ball_linear_cushion",
+          "time": 0.9608
+        },
+        {
+          "type": "ball_linear_cushion",
+          "time": 1.0064
+        },
+        {
+          "type": "ball_pocket",
+          "time": 1.0126
+        },
+        {
+          "type": "rolling_stationary",
+          "time": 1.7147
+        },
+        {
+          "type": "none",
+          "time": 1.7147
+        }
+      ]
+    }
+  ]
+}

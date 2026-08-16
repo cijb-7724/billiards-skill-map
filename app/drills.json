@@ -1,0 +1,136 @@
+{
+  "chapters": [
+    { "id": "foundation", "number": "00", "title": "真っすぐ撞く", "summary": "構え・方向・再現性", "status": "公開中", "drills": ["K00-01"] },
+    { "id": "vertical", "number": "01", "title": "縦回転", "summary": "止め・押し・引き", "status": "公開中", "drills": ["K01-01", "K01-02", "K01-03"] },
+    { "id": "separation", "number": "02", "title": "厚みと分離", "summary": "接線・30度則・速度", "status": "公開中", "drills": ["K02-01"] },
+    { "id": "position", "number": "03", "title": "力加減と出し", "summary": "距離・領域・1クッション", "status": "設計中", "drills": [] },
+    { "id": "english", "number": "04", "title": "横捻り", "summary": "トビ・カーブ・スロー", "status": "公開中", "drills": ["K04-01"] },
+    { "id": "patterns", "number": "05", "title": "取り切り", "summary": "2球から配置判断へ", "status": "設計中", "drills": [] },
+    { "id": "rail", "number": "06", "title": "クッション技術", "summary": "バンク・キック・タッチ球", "status": "公開中", "drills": ["K06-01", "K06-02"] },
+    { "id": "special", "number": "07", "title": "複合ショット", "summary": "コンビ・キャノン・セーフティ", "status": "設計中", "drills": [] }
+  ],
+  "drills": [
+    {
+      "id": "K00-01", "chapterTitle": "真っすぐ撞く", "level": "導入", "title": "サイドポケットへの直線入球",
+      "purpose": "中心線にキューを通し、手玉・的玉・ポケットを一直線に見る基準課題です。",
+      "setup": "上中央サイドポケットと的玉、手玉を縦一直線に置きます。ダイヤ交点からの距離を使い、毎回同じ配置を再現します。",
+      "targetPocket": "上中央", "duration": 2.2,
+      "balls": [{"id":"CB","label":"白","color":"#f7f7f2","x":4,"y":3.35},{"id":"OB1","label":"1","color":"#e8b92e","x":4,"y":1.65}],
+      "cue": {"x":0,"y":0,"label":"中心撞き","speed":"中弱","speedMps":1.20,"elevation":"ほぼ水平","elevationDeg":0},
+      "success": "的玉を指定ポケットへ入れ、手玉が左右どちらの長クッションにも触れなければ成功。",
+      "successMode": "pocket", "successBallId": null, "successZone": null, "pass":{"required":7,"attempts":10,"sessions":2},
+      "trajectories": [
+        {"ballId":"CB","color":"#dbe9e3","points":[{"t":0,"x":4,"y":3.35},{"t":1.05,"x":4,"y":1.84},{"t":2.2,"x":4,"y":1.25}]},
+        {"ballId":"OB1","color":"#efcc69","points":[{"t":0,"x":4,"y":1.65},{"t":1.05,"x":4,"y":1.65},{"t":1.95,"x":4,"y":0,"visible":false},{"t":2.2,"x":4,"y":0,"visible":false}]}
+      ],
+      "validation":{"geometry":"幾何確認済み","geometryNote":"中心線、球間距離、ポケット経路を確認","physics":"暫定軌道","physicsNote":"物理エンジン出力への置換対象","provenance":"基礎原理","source":"直線入球の標準化課題"},
+      "knowledge":{"title":"照準線とストローク線","body":"入球の失敗を厚みの認識とストロークの曲がりに分けるための基準です。手玉が左右へ流れた場合は、狙いより先に中心撞きとキューの直進性を確認します。"}
+    },
+    {
+      "id": "K01-01", "chapterTitle": "縦回転", "level": "基礎", "title": "ストップショットの基準距離",
+      "purpose": "的玉へ当たる瞬間に手玉が無回転になる速度と撞点の組み合わせを覚えます。",
+      "setup": "的玉を（4.00, 1.40）、手玉を（4.00, 3.20）へ置き、上中央サイドポケットを狙います。",
+      "targetPocket": "上中央", "duration": 2.3,
+      "balls": [{"id":"CB","label":"白","color":"#f7f7f2","x":4,"y":3.2},{"id":"OB1","label":"1","color":"#e8b92e","x":4,"y":1.4}],
+      "cue": {"x":0,"y":-0.35,"label":"中心から約半タップ下","speed":"中","speedMps":1.60,"elevation":"ほぼ水平","elevationDeg":0},
+      "success": "入球後、手玉中心が示した長方形内で停止すれば成功。領域は接触点を中心に左右0.25、前後0.20ダイヤです。",
+      "successMode": "stop", "successBallId": "CB", "successZone": {"x1":3.75,"y1":1.38,"x2":4.25,"y2":1.78}, "pass":{"required":7,"attempts":10,"sessions":2},
+      "trajectories": [
+        {"ballId":"CB","color":"#dbe9e3","points":[{"t":0,"x":4,"y":3.2},{"t":1.15,"x":4,"y":1.59},{"t":2.3,"x":4,"y":1.59}]},
+        {"ballId":"OB1","color":"#efcc69","points":[{"t":0,"x":4,"y":1.4},{"t":1.15,"x":4,"y":1.4},{"t":2.05,"x":4,"y":0,"visible":false},{"t":2.3,"x":4,"y":0,"visible":false}]}
+      ],
+      "validation":{"geometry":"幾何確認済み","geometryNote":"直線入球と接触時の球中心間隔を確認","physics":"暫定軌道","physicsNote":"摩擦係数別に撞点を再計算予定","provenance":"基礎原理","source":"無回転衝突の標準化課題"},
+      "knowledge":{"title":"停止は撞点だけで決まらない","body":"同じ下撞きでも距離と速度により、接触時には滑走・無回転・自然回転のいずれにもなります。この課題では撞点を固定し、最初は速度だけを調整します。"}
+    },
+    {
+      "id": "K01-02", "chapterTitle": "縦回転", "level": "基礎", "title": "フォローの1ダイヤ送り",
+      "purpose": "自然回転で的玉に当て、衝突後の手玉を前方の一定領域へ送ります。",
+      "setup": "ストップショットと同じ直線配置を使います。比較可能にするため、変更するのは撞点だけです。",
+      "targetPocket": "上中央", "duration": 2.5,
+      "balls": [{"id":"CB","label":"白","color":"#f7f7f2","x":4,"y":3.2},{"id":"OB1","label":"1","color":"#e8b92e","x":4,"y":1.4}],
+      "cue": {"x":0,"y":0.2,"label":"中心から約1/4タップ上","speed":"弱","speedMps":0.70,"elevation":"ほぼ水平","elevationDeg":0},
+      "success": "入球後、手玉中心を横3.70–4.30、縦0.55–0.95ダイヤの長方形へ収めます。スクラッチは失敗です。",
+      "successMode": "stop", "successBallId": "CB", "successZone": {"x1":3.7,"y1":0.55,"x2":4.3,"y2":0.95}, "pass":{"required":7,"attempts":10,"sessions":2},
+      "trajectories": [
+        {"ballId":"CB","color":"#dbe9e3","points":[{"t":0,"x":4,"y":3.2},{"t":1.1,"x":4,"y":1.59},{"t":2.5,"x":4,"y":0.78}]},
+        {"ballId":"OB1","color":"#efcc69","points":[{"t":0,"x":4,"y":1.4},{"t":1.1,"x":4,"y":1.4},{"t":2.05,"x":4,"y":0,"visible":false},{"t":2.5,"x":4,"y":0,"visible":false}]}
+      ],
+      "validation":{"geometry":"幾何確認済み","geometryNote":"直線入球と前方領域の位置を確認","physics":"暫定軌道","physicsNote":"台速度により停止距離を校正","provenance":"基礎原理","source":"縦回転の距離制御課題"},
+      "knowledge":{"title":"前進量は残った順回転で決まる","body":"衝突時に手玉へどれだけ順回転が残っているかが前進量を左右します。撞点を増やす前に、同じ撞点のまま速度で到達距離を揃えます。"}
+    },
+    {
+      "id": "K01-03", "chapterTitle": "縦回転", "level": "基礎", "title": "ドローの1ダイヤ戻し",
+      "purpose": "衝突時まで逆回転を残し、手玉を手前の長方形へ戻します。",
+      "setup": "前二課題と同じ直線配置です。まず短い戻し幅から始め、強い引きは後の課題に分離します。",
+      "targetPocket": "上中央", "duration": 2.7,
+      "balls": [{"id":"CB","label":"白","color":"#f7f7f2","x":4,"y":3.2},{"id":"OB1","label":"1","color":"#e8b92e","x":4,"y":1.4}],
+      "cue": {"x":0,"y":-0.55,"label":"中心から約3/4タップ下","speed":"中","speedMps":2.00,"elevation":"できるだけ水平","elevationDeg":0},
+      "success": "入球後、手玉中心を横3.70–4.30、縦2.25–2.75ダイヤの長方形へ戻します。",
+      "successMode": "stop", "successBallId": "CB", "successZone": {"x1":3.7,"y1":2.25,"x2":4.3,"y2":2.75}, "pass":{"required":6,"attempts":10,"sessions":2},
+      "trajectories": [
+        {"ballId":"CB","color":"#dbe9e3","points":[{"t":0,"x":4,"y":3.2},{"t":1.1,"x":4,"y":1.59},{"t":2.7,"x":4,"y":2.5}]},
+        {"ballId":"OB1","color":"#efcc69","points":[{"t":0,"x":4,"y":1.4},{"t":1.1,"x":4,"y":1.4},{"t":2.05,"x":4,"y":0,"visible":false},{"t":2.7,"x":4,"y":0,"visible":false}]}
+      ],
+      "validation":{"geometry":"幾何確認済み","geometryNote":"戻り方向と領域が衝突前方の反対側にあることを確認","physics":"暫定軌道","physicsNote":"台摩擦と速度に応じ再計算予定","provenance":"基礎原理","source":"逆回転の距離制御課題"},
+      "knowledge":{"title":"ドローは衝突後に突然生まれない","body":"手玉が的玉へ届くまで逆回転を保てたときだけ戻ります。キューを立てず、低い撞点へ水平に通すことと、必要な速度を与えることを別々に観察します。"}
+    },
+    {
+      "id": "K02-01", "chapterTitle": "厚みと分離", "level": "初級", "title": "接線方向の確認",
+      "purpose": "無回転で当たった手玉が、的玉の進行線に対する接線方向へ分離することを観察します。",
+      "setup": "的玉を（4.00, 2.00）へ置き右上コーナーを狙います。手玉はイマジナリーボールへ向かう線上の（2.20, 2.55）です。",
+      "targetPocket": "右上", "duration": 2.8,
+      "balls": [{"id":"CB","label":"白","color":"#f7f7f2","x":2.2,"y":2.55},{"id":"OB1","label":"1","color":"#e8b92e","x":4,"y":2}],
+      "cue": {"x":0,"y":-0.28,"label":"接触時に無回転となる下撞き","speed":"中","speedMps":1.60,"elevation":"ほぼ水平","elevationDeg":0},
+      "success": "的玉を入れ、手玉が横3.70–4.35、縦2.45–3.10の観察領域を通過すれば成功。停止位置ではなく通過判定です。",
+      "successMode": "pass", "successBallId": "CB", "successZone": {"x1":3.7,"y1":2.45,"x2":4.35,"y2":3.1}, "pass":{"required":6,"attempts":10,"sessions":2},
+      "trajectories": [
+        {"ballId":"CB","color":"#dbe9e3","points":[{"t":0,"x":2.2,"y":2.55},{"t":1.2,"x":3.84,"y":2.08},{"t":2.8,"x":4.18,"y":2.88}]},
+        {"ballId":"OB1","color":"#efcc69","points":[{"t":0,"x":4,"y":2},{"t":1.2,"x":4,"y":2},{"t":2.6,"x":8,"y":0,"visible":false},{"t":2.8,"x":8,"y":0,"visible":false}]}
+      ],
+      "validation":{"geometry":"幾何確認済み","geometryNote":"ゴースト位置と的玉のポケット線を計算","physics":"理想無回転モデル","physicsNote":"実台ではスローにより角度差あり","provenance":"物理原理","source":"90度則を観察する構成"},
+      "knowledge":{"title":"分離角の基準は接線","body":"無回転で球が衝突すると、手玉は的玉の進行線に直角な接線方向へ進むのが基準です。順回転では接線より前へ、逆回転では後ろへ変化します。"}
+    },
+    {
+      "id": "K04-01", "chapterTitle": "横捻り", "level": "初級", "title": "横捻りのクッション基準測定",
+      "purpose": "的玉を使わず、撞点だけを変えたときのトビ・カーブ・クッション反射の合成結果を測ります。",
+      "setup": "手玉を（2.00, 3.00）に置き、上長クッションの（4.50, 0.00）を狙います。サイドポケット開口部を避け、反射後に縦2.70–3.30の帯へ戻る位置を記録します。",
+      "targetPocket": "なし", "duration": 3.0,
+      "balls": [{"id":"CB","label":"白","color":"#f7f7f2","x":2,"y":3}],
+      "cue": {"x":0.5,"y":0,"label":"右半タップ","speed":"中","speedMps":1.60,"elevation":"できるだけ水平","elevationDeg":0},
+      "success": "入射点が（4.35–4.65, 0.00）に入り、戻り線が横6.70–7.50、縦2.70–3.30を通れば記録成功。これは進級判定より台の校正を目的とします。",
+      "successMode": "pass", "successBallId": "CB", "successZone": {"x1":6.7,"y1":2.7,"x2":7.5,"y2":3.3}, "pass":{"required":5,"attempts":5,"sessions":1},
+      "trajectories": [{"ballId":"CB","color":"#dbe9e3","points":[{"t":0,"x":2,"y":3},{"t":1.35,"x":4.5,"y":0.09},{"t":3,"x":7.2,"y":3}]}],
+      "validation":{"geometry":"幾何確認済み","geometryNote":"反射点はポケット開口部から十分離れた有効クッション上","physics":"実台校正型","physicsNote":"予測値より測定値を正本とする","provenance":"測定課題","source":"横捻りの台別基準づくり"},
+      "knowledge":{"title":"横捻りの結果は三つの作用の合成","body":"キュー接触直後のトビ、走行中のカーブ、クッション接触時の反射角変化が重なります。最初から入球課題にせず、的玉のない往復で自分のキューと台の基準を測ります。"}
+    },
+    {
+      "id": "K06-01", "chapterTitle": "クッション技術", "level": "初級", "title": "中心撞きのV字反射",
+      "purpose": "バンクへ進む前に、中心撞きでの入射点・反射点・速度差を測定します。",
+      "setup": "手玉を（2.00, 3.00）から上長クッションの（4.50, 0.00）へ送ります。中央サイドポケットから0.50ダイヤ離れた直線クッションを使用します。",
+      "targetPocket": "なし", "duration": 3.2,
+      "balls": [{"id":"CB","label":"白","color":"#f7f7f2","x":2,"y":3}],
+      "cue": {"x":0,"y":0,"label":"中心撞き","speed":"中弱・中・中強の3段階","speedMps":1.60,"elevation":"ほぼ水平","elevationDeg":0},
+      "success": "各速度で5回撞き、最初の反射後に横7.35–7.85、縦2.70–3.30を通った回数と左右の偏りを記録します。",
+      "successMode": "pass", "successBallId": "CB", "successZone": {"x1":7.35,"y1":2.7,"x2":7.85,"y2":3.3}, "pass":{"required":4,"attempts":5,"sessions":2},
+      "trajectories": [{"ballId":"CB","color":"#dbe9e3","points":[{"t":0,"x":2,"y":3},{"t":1.45,"x":4.5,"y":0.09},{"t":3.2,"x":7.6,"y":3}]}],
+      "validation":{"geometry":"幾何確認済み","geometryNote":"反射点は中央サイドポケット開口部から0.50ダイヤ離れた有効クッション上","physics":"実台校正型","physicsNote":"中弱・中・中強の測定結果を以後の基準にする","provenance":"測定課題","source":"鏡像法導入前の基準測定"},
+      "knowledge":{"title":"理論線と実台線を分ける","body":"鏡像法は狙いの初期値を作りますが、実際のクッションは速度・縦回転・横回転により反射角が変わります。まず中心撞きのずれを測り、以後の補正量の原点にします。"}
+    },
+    {
+      "id": "K06-02", "chapterTitle": "クッション技術", "level": "中級入口", "title": "鏡像法による1クッションバンク",
+      "purpose": "指定ポケットをクッションの外側へ鏡写しし、的玉の基準反射点を求めます。",
+      "setup": "鏡像法の理論点は（5.09, 4.00）です。物理モデルの基準補正を加え、的玉を下長クッション（5.30, 4.00）付近へ送ります。手玉は入射線上の（3.05, 1.47）です。",
+      "targetPocket": "右上", "duration": 3.5,
+      "balls": [{"id":"CB","label":"白","color":"#f7f7f2","x":3.05,"y":1.47},{"id":"OB1","label":"1","color":"#e8b92e","x":4,"y":2.5}],
+      "cue": {"x":0,"y":0,"label":"中心撞き","speed":"中強","speedMps":2.80,"elevation":"ほぼ水平","elevationDeg":0},
+      "success": "的玉が下長クッションの横5.10–5.50へ入り、右上コーナーへ入球すれば成功。手玉の停止位置は採点しません。",
+      "successMode": "pass", "successBallId": "OB1", "successZone": {"x1":5.1,"y1":3.82,"x2":5.5,"y2":4}, "pass":{"required":5,"attempts":10,"sessions":2},
+      "trajectories": [
+        {"ballId":"CB","color":"#dbe9e3","points":[{"t":0,"x":3.05,"y":1.47},{"t":1.15,"x":3.87,"y":2.38},{"t":3.5,"x":3.87,"y":2.38}]},
+        {"ballId":"OB1","color":"#efcc69","points":[{"t":0,"x":4,"y":2.5},{"t":1.15,"x":4,"y":2.5},{"t":2.05,"x":5.3,"y":3.91},{"t":3.45,"x":8,"y":0,"visible":false},{"t":3.5,"x":8,"y":0,"visible":false}]}
+      ],
+      "validation":{"geometry":"幾何確認済み","geometryNote":"鏡像点5.09と補正後反射点5.30を別々に表示","physics":"物理計算済み","physicsNote":"pooltool 0.6で入球・衝突順序を確認","provenance":"既知システム","source":"鏡像法から実台補正へ進む基準バンク"},
+      "knowledge":{"title":"鏡像法は完成した狙いではなく出発点","body":"ポケットをクッション外へ鏡写しした直線は、反射点の幾何的基準です。的玉の順回転、速度、クッション特性で実際のバンクは短くなりやすいため、基準線からの補正を記録します。"}
+    }
+  ]
+}
