@@ -4,7 +4,8 @@ import type { Quaternion, ShotPoint, ShotTrajectory } from "./physics";
 
 type ThreeDrill = {
   id: string;
-  balls: Array<{ id: string; color: string; x: number; y: number }>;
+  targetPocket?: string;
+  balls: Array<{ id: string; label?: string; color: string; x: number; y: number }>;
   successZone: { x1: number; y1: number; x2: number; y2: number } | null;
 };
 
@@ -13,12 +14,19 @@ type SceneState = {
   scene: THREE.Scene;
   camera: THREE.PerspectiveCamera;
   groups: Map<string, THREE.Group>;
+  cue: THREE.Group;
 };
 
 const DIAMOND_M = 2.54 / 8;
 const TABLE_LENGTH = 2.54;
 const TABLE_WIDTH = 1.27;
 const BALL_RADIUS = 0.028575;
+const UP = new THREE.Vector3(0, 1, 0);
+const POCKETS = [
+  { id: "左上", x: 0, z: 0 }, { id: "上中央", x: TABLE_LENGTH / 2, z: 0 },
+  { id: "右上", x: TABLE_LENGTH, z: 0 }, { id: "左下", x: 0, z: TABLE_WIDTH },
+  { id: "下中央", x: TABLE_LENGTH / 2, z: TABLE_WIDTH }, { id: "右下", x: TABLE_LENGTH, z: TABLE_WIDTH },
+];
 
 function normalizeQuaternion(q: Quaternion): Quaternion {
   const magnitude = Math.hypot(...q) || 1;
@@ -62,26 +70,223 @@ function addTrajectory(scene: THREE.Scene, trajectory: ShotTrajectory, color: st
   const visiblePoints = trajectory.points.filter((point) => point.visible !== false);
   if (visiblePoints.length < 2) return;
   const geometry = new THREE.BufferGeometry().setFromPoints(visiblePoints.map((point) => (
-    new THREE.Vector3(point.x * DIAMOND_M, .006, point.y * DIAMOND_M)
+    new THREE.Vector3(point.x * DIAMOND_M, .009, point.y * DIAMOND_M)
   )));
-  const material = new THREE.LineDashedMaterial({ color, transparent: true, opacity, dashSize: .045, gapSize: .028 });
+  const material = new THREE.LineDashedMaterial({ color, transparent: true, opacity, dashSize: .042, gapSize: .025 });
   const line = new THREE.Line(geometry, material);
   line.computeLineDistances();
   scene.add(line);
 }
 
-function addBallMarkers(group: THREE.Group, cueBall: boolean) {
-  const markerGeometry = new THREE.SphereGeometry(.0032, 10, 8);
-  const markerMaterial = new THREE.MeshBasicMaterial({ color: cueBall ? 0xc83f35 : 0xfffdf2 });
-  const amount = BALL_RADIUS * .94;
-  const positions = [
-    [amount, 0, 0], [-amount, 0, 0], [0, amount, 0], [0, -amount, 0], [0, 0, amount], [0, 0, -amount],
+function makeDiscMaterial(label: string, foreground: string, background: string) {
+  const canvas = document.createElement("canvas");
+  canvas.width = 128;
+  canvas.height = 128;
+  const context = canvas.getContext("2d")!;
+  context.clearRect(0, 0, 128, 128);
+  context.beginPath();
+  context.arc(64, 64, 61, 0, Math.PI * 2);
+  context.fillStyle = background;
+  context.fill();
+  if (label) {
+    context.fillStyle = foreground;
+    context.font = "700 72px Arial, sans-serif";
+    context.textAlign = "center";
+    context.textBaseline = "middle";
+    context.fillText(label, 64, 68);
+  }
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.anisotropy = 4;
+  return new THREE.MeshStandardMaterial({ map: texture, transparent: true, roughness: .24, polygonOffset: true, polygonOffsetFactor: -2 });
+}
+
+function addSurfaceDisc(group: THREE.Group, normal: THREE.Vector3, radius: number, material: THREE.Material) {
+  const disc = new THREE.Mesh(new THREE.CircleGeometry(radius, 32), material);
+  disc.position.copy(normal).multiplyScalar(BALL_RADIUS * 1.008);
+  disc.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), normal);
+  disc.castShadow = true;
+  group.add(disc);
+}
+
+function createBall(ball: ThreeDrill["balls"][number]) {
+  const group = new THREE.Group();
+  const cueBall = ball.id === "CB";
+  const body = new THREE.Mesh(
+    new THREE.SphereGeometry(BALL_RADIUS, 48, 32),
+    new THREE.MeshPhysicalMaterial({
+      color: cueBall ? 0xf7f5ed : ball.color,
+      roughness: .2,
+      metalness: 0,
+      clearcoat: .7,
+      clearcoatRoughness: .16,
+    }),
+  );
+  body.castShadow = true;
+  body.receiveShadow = true;
+  group.add(body);
+
+  if (cueBall) {
+    const redSpot = makeDiscMaterial("", "#fff", "#c83d34");
+    const spotRadius = BALL_RADIUS * .14;
+    [
+      new THREE.Vector3(0, 1, 0), new THREE.Vector3(0, -1, 0),
+      new THREE.Vector3(1, 0, 0), new THREE.Vector3(-1, 0, 0),
+      new THREE.Vector3(0, 0, 1), new THREE.Vector3(0, 0, -1),
+    ].forEach((normal) => addSurfaceDisc(group, normal, spotRadius, redSpot));
+  } else {
+    const numberDisc = makeDiscMaterial(ball.label || "1", "#1c211e", "#fffdf4");
+    addSurfaceDisc(group, new THREE.Vector3(0, 1, 0), BALL_RADIUS * .43, numberDisc);
+    addSurfaceDisc(group, new THREE.Vector3(0, -1, 0), BALL_RADIUS * .43, numberDisc);
+  }
+  return group;
+}
+
+function addTable(scene: THREE.Scene, drill: ThreeDrill) {
+  const wood = new THREE.MeshStandardMaterial({ color: 0x6c3f27, roughness: .46, metalness: .03 });
+  const darkWood = new THREE.MeshStandardMaterial({ color: 0x302017, roughness: .62 });
+  const cushion = new THREE.MeshStandardMaterial({ color: 0x0b604b, roughness: .78 });
+  const cloth = new THREE.MeshStandardMaterial({ color: 0x12725a, roughness: .88 });
+
+  const apron = new THREE.Mesh(new THREE.BoxGeometry(TABLE_LENGTH + .25, .095, TABLE_WIDTH + .25), darkWood);
+  apron.position.set(TABLE_LENGTH / 2, -.055, TABLE_WIDTH / 2);
+  apron.receiveShadow = true;
+  scene.add(apron);
+
+  const bed = new THREE.Mesh(new THREE.PlaneGeometry(TABLE_LENGTH, TABLE_WIDTH), cloth);
+  bed.rotation.x = -Math.PI / 2;
+  bed.position.set(TABLE_LENGTH / 2, .001, TABLE_WIDTH / 2);
+  bed.receiveShadow = true;
+  scene.add(bed);
+
+  const railHeight = .07;
+  const railWidth = .105;
+  const rails = [
+    { size: [TABLE_LENGTH + railWidth * 2, railHeight, railWidth], position: [TABLE_LENGTH / 2, railHeight / 2, -railWidth / 2] },
+    { size: [TABLE_LENGTH + railWidth * 2, railHeight, railWidth], position: [TABLE_LENGTH / 2, railHeight / 2, TABLE_WIDTH + railWidth / 2] },
+    { size: [railWidth, railHeight, TABLE_WIDTH], position: [-railWidth / 2, railHeight / 2, TABLE_WIDTH / 2] },
+    { size: [railWidth, railHeight, TABLE_WIDTH], position: [TABLE_LENGTH + railWidth / 2, railHeight / 2, TABLE_WIDTH / 2] },
   ];
-  positions.forEach(([x, y, z]) => {
-    const marker = new THREE.Mesh(markerGeometry, markerMaterial);
-    marker.position.set(x, y, z);
-    group.add(marker);
+  rails.forEach((rail) => {
+    const mesh = new THREE.Mesh(new THREE.BoxGeometry(...rail.size as [number, number, number]), wood);
+    mesh.position.set(...rail.position as [number, number, number]);
+    mesh.castShadow = true;
+    mesh.receiveShadow = true;
+    scene.add(mesh);
   });
+
+  const cushionHeight = .042;
+  const cushionWidth = .035;
+  [
+    { size: [TABLE_LENGTH, cushionHeight, cushionWidth], position: [TABLE_LENGTH / 2, cushionHeight / 2, cushionWidth / 2] },
+    { size: [TABLE_LENGTH, cushionHeight, cushionWidth], position: [TABLE_LENGTH / 2, cushionHeight / 2, TABLE_WIDTH - cushionWidth / 2] },
+    { size: [cushionWidth, cushionHeight, TABLE_WIDTH], position: [cushionWidth / 2, cushionHeight / 2, TABLE_WIDTH / 2] },
+    { size: [cushionWidth, cushionHeight, TABLE_WIDTH], position: [TABLE_LENGTH - cushionWidth / 2, cushionHeight / 2, TABLE_WIDTH / 2] },
+  ].forEach((part) => {
+    const mesh = new THREE.Mesh(new THREE.BoxGeometry(...part.size as [number, number, number]), cushion);
+    mesh.position.set(...part.position as [number, number, number]);
+    mesh.castShadow = true;
+    scene.add(mesh);
+  });
+
+  const gridMaterial = new THREE.LineBasicMaterial({ color: 0xd8eee5, transparent: true, opacity: .11 });
+  const gridPoints: THREE.Vector3[] = [];
+  for (let x = .5; x < 8; x += .5) {
+    gridPoints.push(new THREE.Vector3(x * DIAMOND_M, .004, 0), new THREE.Vector3(x * DIAMOND_M, .004, TABLE_WIDTH));
+  }
+  for (let y = .5; y < 4; y += .5) {
+    gridPoints.push(new THREE.Vector3(0, .004, y * DIAMOND_M), new THREE.Vector3(TABLE_LENGTH, .004, y * DIAMOND_M));
+  }
+  scene.add(new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(gridPoints), gridMaterial));
+
+  const diamondMaterial = new THREE.MeshStandardMaterial({ color: 0xf3dfb0, roughness: .35 });
+  const diamondGeometry = new THREE.OctahedronGeometry(.012, 0);
+  for (let x = 1; x < 8; x++) {
+    if (x === 4) continue;
+    [-.078, TABLE_WIDTH + .078].forEach((z) => {
+      const diamond = new THREE.Mesh(diamondGeometry, diamondMaterial);
+      diamond.scale.set(1.25, .22, .8);
+      diamond.position.set(x * DIAMOND_M, railHeight + .002, z);
+      scene.add(diamond);
+    });
+  }
+  for (let y = 1; y < 4; y++) {
+    [-.078, TABLE_LENGTH + .078].forEach((x) => {
+      const diamond = new THREE.Mesh(diamondGeometry, diamondMaterial);
+      diamond.scale.set(.8, .22, 1.25);
+      diamond.position.set(x, railHeight + .002, y * DIAMOND_M);
+      scene.add(diamond);
+    });
+  }
+
+  const pocketMaterial = new THREE.MeshStandardMaterial({ color: 0x030705, roughness: 1 });
+  const rimMaterial = new THREE.MeshStandardMaterial({ color: 0x1b1713, roughness: .82 });
+  POCKETS.forEach((pocketPosition) => {
+    const pocket = new THREE.Mesh(new THREE.CylinderGeometry(.066, .06, .025, 40), pocketMaterial);
+    pocket.position.set(pocketPosition.x, .01, pocketPosition.z);
+    scene.add(pocket);
+    const rim = new THREE.Mesh(new THREE.TorusGeometry(.065, .009, 8, 36), rimMaterial);
+    rim.rotation.x = Math.PI / 2;
+    rim.position.set(pocketPosition.x, .027, pocketPosition.z);
+    scene.add(rim);
+    if (pocketPosition.id === drill.targetPocket) {
+      const target = new THREE.Mesh(
+        new THREE.TorusGeometry(.082, .006, 8, 48),
+        new THREE.MeshBasicMaterial({ color: 0xffd468, transparent: true, opacity: .92 }),
+      );
+      target.rotation.x = Math.PI / 2;
+      target.position.set(pocketPosition.x, .035, pocketPosition.z);
+      scene.add(target);
+    }
+  });
+}
+
+function createCue() {
+  const cue = new THREE.Group();
+  const shaft = new THREE.Mesh(
+    new THREE.CylinderGeometry(.006, .011, .72, 18),
+    new THREE.MeshStandardMaterial({ color: 0xd8b174, roughness: .36 }),
+  );
+  shaft.position.y = -.36;
+  shaft.castShadow = true;
+  cue.add(shaft);
+  const butt = new THREE.Mesh(
+    new THREE.CylinderGeometry(.011, .015, .34, 18),
+    new THREE.MeshStandardMaterial({ color: 0x2e241d, roughness: .32, metalness: .05 }),
+  );
+  butt.position.y = -.89;
+  butt.castShadow = true;
+  cue.add(butt);
+  const tip = new THREE.Mesh(
+    new THREE.CylinderGeometry(.0063, .0063, .014, 18),
+    new THREE.MeshStandardMaterial({ color: 0x3d7890, roughness: .72 }),
+  );
+  tip.position.y = .007;
+  cue.add(tip);
+  return cue;
+}
+
+function addSuccessZone(scene: THREE.Scene, zone: NonNullable<ThreeDrill["successZone"]>) {
+  const width = (zone.x2 - zone.x1) * DIAMOND_M;
+  const depth = (zone.y2 - zone.y1) * DIAMOND_M;
+  const centerX = (zone.x1 + zone.x2) * DIAMOND_M / 2;
+  const centerZ = (zone.y1 + zone.y2) * DIAMOND_M / 2;
+  const fill = new THREE.Mesh(
+    new THREE.PlaneGeometry(width, depth),
+    new THREE.MeshBasicMaterial({ color: 0xffd36b, transparent: true, opacity: .2, side: THREE.DoubleSide }),
+  );
+  fill.rotation.x = -Math.PI / 2;
+  fill.position.set(centerX, .007, centerZ);
+  scene.add(fill);
+  const outline = new THREE.LineLoop(
+    new THREE.BufferGeometry().setFromPoints([
+      new THREE.Vector3(-width / 2, 0, -depth / 2), new THREE.Vector3(width / 2, 0, -depth / 2),
+      new THREE.Vector3(width / 2, 0, depth / 2), new THREE.Vector3(-width / 2, 0, depth / 2),
+    ]),
+    new THREE.LineBasicMaterial({ color: 0xffd36b, transparent: true, opacity: .9 }),
+  );
+  outline.position.set(centerX, .011, centerZ);
+  scene.add(outline);
 }
 
 export function ThreeTable({
@@ -91,6 +296,7 @@ export function ThreeTable({
   showBaseline,
   aimPoint,
   time,
+  viewMode,
 }: {
   drill: ThreeDrill;
   trajectories: ShotTrajectory[];
@@ -98,6 +304,7 @@ export function ThreeTable({
   showBaseline: boolean;
   aimPoint: { x: number; y: number };
   time: number;
+  viewMode: "overhead" | "player";
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const stateRef = useRef<SceneState | null>(null);
@@ -105,86 +312,50 @@ export function ThreeTable({
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: "high-performance" });
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: "high-performance", alpha: false });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.08;
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x10261f);
-    scene.fog = new THREE.Fog(0x10261f, 2.1, 4.2);
-    const camera = new THREE.PerspectiveCamera(47, 2, .01, 8);
+    scene.background = new THREE.Color(0x091712);
+    scene.fog = new THREE.FogExp2(0x091712, .28);
+    const camera = new THREE.PerspectiveCamera(viewMode === "player" ? 45 : 38, 2, .01, 10);
 
-    scene.add(new THREE.HemisphereLight(0xfff7e5, 0x183d32, 2.25));
-    const directional = new THREE.DirectionalLight(0xfff5dc, 2.2);
-    directional.position.set(.3, 1.7, 1.2);
-    scene.add(directional);
+    scene.add(new THREE.HemisphereLight(0xfff4dc, 0x102d24, 1.75));
+    const keyLight = new THREE.DirectionalLight(0xfff0cf, 3.4);
+    keyLight.position.set(.35, 2.7, 1.65);
+    keyLight.castShadow = true;
+    keyLight.shadow.mapSize.set(2048, 2048);
+    keyLight.shadow.camera.left = -2;
+    keyLight.shadow.camera.right = 2;
+    keyLight.shadow.camera.top = 2;
+    keyLight.shadow.camera.bottom = -2;
+    scene.add(keyLight);
+    const fillLight = new THREE.PointLight(0x73b6ff, .75, 5);
+    fillLight.position.set(2.7, 1.2, -.5);
+    scene.add(fillLight);
 
-    const floor = new THREE.Mesh(
-      new THREE.PlaneGeometry(TABLE_LENGTH, TABLE_WIDTH),
-      new THREE.MeshStandardMaterial({ color: 0x126a54, roughness: .93, metalness: 0 }),
+    const room = new THREE.Mesh(
+      new THREE.PlaneGeometry(8, 6),
+      new THREE.MeshStandardMaterial({ color: 0x0d1b17, roughness: 1 }),
     );
-    floor.rotation.x = -Math.PI / 2;
-    floor.position.set(TABLE_LENGTH / 2, 0, TABLE_WIDTH / 2);
-    scene.add(floor);
+    room.rotation.x = -Math.PI / 2;
+    room.position.set(TABLE_LENGTH / 2, -.108, TABLE_WIDTH / 2);
+    room.receiveShadow = true;
+    scene.add(room);
 
-    const gridMaterial = new THREE.LineBasicMaterial({ color: 0xb8d8cc, transparent: true, opacity: .2 });
-    const gridPoints: THREE.Vector3[] = [];
-    for (let x = .25; x < 8; x += .25) {
-      gridPoints.push(new THREE.Vector3(x * DIAMOND_M, .002, 0), new THREE.Vector3(x * DIAMOND_M, .002, TABLE_WIDTH));
-    }
-    for (let y = .25; y < 4; y += .25) {
-      gridPoints.push(new THREE.Vector3(0, .002, y * DIAMOND_M), new THREE.Vector3(TABLE_LENGTH, .002, y * DIAMOND_M));
-    }
-    scene.add(new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(gridPoints), gridMaterial));
-
-    const railMaterial = new THREE.MeshStandardMaterial({ color: 0x71452d, roughness: .7 });
-    const railHeight = .055;
-    const railWidth = .085;
-    const rails = [
-      { size: [TABLE_LENGTH + railWidth * 2, railHeight, railWidth], position: [TABLE_LENGTH / 2, railHeight / 2, -railWidth / 2] },
-      { size: [TABLE_LENGTH + railWidth * 2, railHeight, railWidth], position: [TABLE_LENGTH / 2, railHeight / 2, TABLE_WIDTH + railWidth / 2] },
-      { size: [railWidth, railHeight, TABLE_WIDTH], position: [-railWidth / 2, railHeight / 2, TABLE_WIDTH / 2] },
-      { size: [railWidth, railHeight, TABLE_WIDTH], position: [TABLE_LENGTH + railWidth / 2, railHeight / 2, TABLE_WIDTH / 2] },
-    ];
-    rails.forEach((rail) => {
-      const mesh = new THREE.Mesh(new THREE.BoxGeometry(...rail.size as [number, number, number]), railMaterial);
-      mesh.position.set(...rail.position as [number, number, number]);
-      scene.add(mesh);
-    });
-
-    const pocketGeometry = new THREE.CylinderGeometry(.065, .065, .008, 24);
-    const pocketMaterial = new THREE.MeshStandardMaterial({ color: 0x070b09, roughness: 1 });
-    [[0, 0], [TABLE_LENGTH / 2, 0], [TABLE_LENGTH, 0], [0, TABLE_WIDTH], [TABLE_LENGTH / 2, TABLE_WIDTH], [TABLE_LENGTH, TABLE_WIDTH]].forEach(([x, z]) => {
-      const pocket = new THREE.Mesh(pocketGeometry, pocketMaterial);
-      pocket.position.set(x, .007, z);
-      scene.add(pocket);
-    });
-
-    if (drill.successZone) {
-      const zone = drill.successZone;
-      const width = (zone.x2 - zone.x1) * DIAMOND_M;
-      const depth = (zone.y2 - zone.y1) * DIAMOND_M;
-      const zoneMesh = new THREE.Mesh(
-        new THREE.PlaneGeometry(width, depth),
-        new THREE.MeshBasicMaterial({ color: 0xffd36b, transparent: true, opacity: .25, side: THREE.DoubleSide }),
-      );
-      zoneMesh.rotation.x = -Math.PI / 2;
-      zoneMesh.position.set((zone.x1 + zone.x2) * DIAMOND_M / 2, .004, (zone.y1 + zone.y2) * DIAMOND_M / 2);
-      scene.add(zoneMesh);
-    }
-
-    if (showBaseline) baselineTrajectories.forEach((trajectory) => addTrajectory(scene, trajectory, "#d7ddd9", .25));
-    trajectories.forEach((trajectory) => addTrajectory(scene, trajectory, trajectory.ballId === "CB" ? "#fff4de" : "#ffd34f", .78));
+    addTable(scene, drill);
+    if (drill.successZone) addSuccessZone(scene, drill.successZone);
+    if (showBaseline) baselineTrajectories.forEach((trajectory) => addTrajectory(scene, trajectory, "#d7ddd9", .24));
+    trajectories.forEach((trajectory) => addTrajectory(scene, trajectory, trajectory.ballId === "CB" ? "#fff7e2" : "#ffd34f", .72));
 
     const groups = new Map<string, THREE.Group>();
     drill.balls.forEach((ball) => {
-      const group = new THREE.Group();
-      const material = new THREE.MeshStandardMaterial({
-        color: ball.id === "CB" ? 0xf4f2e9 : 0xe5b92f,
-        roughness: .32,
-        metalness: 0,
-      });
-      group.add(new THREE.Mesh(new THREE.SphereGeometry(BALL_RADIUS, 28, 20), material));
-      addBallMarkers(group, ball.id === "CB");
+      const group = createBall(ball);
       scene.add(group);
       groups.set(ball.id, group);
     });
@@ -196,8 +367,36 @@ export function ThreeTable({
       0,
       (aimPoint.y - cb.y) * DIAMOND_M,
     ).normalize();
-    camera.position.copy(cbPosition).addScaledVector(aimDirection, -.62).add(new THREE.Vector3(0, .29, 0));
-    camera.lookAt(cbPosition.clone().addScaledVector(aimDirection, .72).add(new THREE.Vector3(0, -.008, 0)));
+
+    const aimingLine = new THREE.Line(
+      new THREE.BufferGeometry().setFromPoints([
+        cbPosition.clone().addScaledVector(aimDirection, BALL_RADIUS * 1.15).setY(.013),
+        new THREE.Vector3(aimPoint.x * DIAMOND_M, .013, aimPoint.y * DIAMOND_M),
+      ]),
+      new THREE.LineBasicMaterial({ color: 0xfff4d3, transparent: true, opacity: .6 }),
+    );
+    scene.add(aimingLine);
+
+    const ghostBall = new THREE.Mesh(
+      new THREE.TorusGeometry(BALL_RADIUS, .0022, 8, 40),
+      new THREE.MeshBasicMaterial({ color: 0xfff4d3, transparent: true, opacity: .72 }),
+    );
+    ghostBall.rotation.x = Math.PI / 2;
+    ghostBall.position.set(aimPoint.x * DIAMOND_M, .015, aimPoint.y * DIAMOND_M);
+    scene.add(ghostBall);
+
+    const cue = createCue();
+    cue.position.copy(cbPosition).addScaledVector(aimDirection, -(BALL_RADIUS + .012));
+    cue.quaternion.setFromUnitVectors(UP, aimDirection);
+    scene.add(cue);
+
+    if (viewMode === "player") {
+      camera.position.copy(cbPosition).addScaledVector(aimDirection, -.72).add(new THREE.Vector3(0, .32, 0));
+      camera.lookAt(cbPosition.clone().addScaledVector(aimDirection, .88).add(new THREE.Vector3(0, -.01, 0)));
+    } else {
+      camera.position.set(TABLE_LENGTH / 2, 2.6, TABLE_WIDTH * 1.92);
+      camera.lookAt(TABLE_LENGTH / 2, 0, TABLE_WIDTH / 2);
+    }
 
     const resize = () => {
       const rect = canvas.getBoundingClientRect();
@@ -208,7 +407,7 @@ export function ThreeTable({
     };
     const observer = new ResizeObserver(resize);
     observer.observe(canvas);
-    stateRef.current = { renderer, scene, camera, groups };
+    stateRef.current = { renderer, scene, camera, groups, cue };
     resize();
     return () => {
       observer.disconnect();
@@ -216,13 +415,16 @@ export function ThreeTable({
         if (object instanceof THREE.Mesh || object instanceof THREE.Line || object instanceof THREE.LineSegments) {
           object.geometry.dispose();
           const materials = Array.isArray(object.material) ? object.material : [object.material];
-          materials.forEach((material) => material.dispose());
+          materials.forEach((material) => {
+            if ("map" in material && material.map instanceof THREE.Texture) material.map.dispose();
+            material.dispose();
+          });
         }
       });
       renderer.dispose();
       stateRef.current = null;
     };
-  }, [aimPoint.x, aimPoint.y, baselineTrajectories, drill, showBaseline, trajectories]);
+  }, [aimPoint.x, aimPoint.y, baselineTrajectories, drill, showBaseline, trajectories, viewMode]);
 
   useEffect(() => {
     const state = stateRef.current;
@@ -236,14 +438,16 @@ export function ThreeTable({
       group.position.set(point.x * DIAMOND_M, BALL_RADIUS, point.y * DIAMOND_M);
       group.quaternion.copy(poolQuaternionToThree(point.q));
     });
+    state.cue.visible = time < .12;
     state.renderer.render(state.scene, state.camera);
   }, [drill.balls, time, trajectories]);
 
+  const label = viewMode === "player" ? "手玉後方のプレイヤー視点" : "立体の台を見渡す3D俯瞰";
   return (
-    <div className="three-stage">
-      <canvas ref={canvasRef} className="three-canvas" aria-label={`${drill.id}のプレイヤー視点3Dシミュレーション`} />
-      <div className="player-view-caption"><span />手玉後方から見たプレイヤー視点</div>
+    <div className={`three-stage ${viewMode}`}>
+      <canvas ref={canvasRef} className="three-canvas" aria-label={`${drill.id}の${label}シミュレーション`} />
+      <div className="player-view-caption"><span />{label}・球面模様が実回転</div>
+      <div className="three-badge">リアルタイム3D</div>
     </div>
   );
 }
-

@@ -33,17 +33,6 @@ function interpolateQuaternion(start: Quaternion, end: Quaternion, ratio: number
   return normalizeQuaternion(start.map((value, index) => value + (adjustedEnd[index] - value) * ratio) as Quaternion);
 }
 
-function rotateVector([w, x, y, z]: Quaternion, [vx, vy, vz]: [number, number, number]): [number, number, number] {
-  const tx = 2 * (y * vz - z * vy);
-  const ty = 2 * (z * vx - x * vz);
-  const tz = 2 * (x * vy - y * vx);
-  return [
-    vx + w * tx + (y * tz - z * ty),
-    vy + w * ty + (z * tx - x * tz),
-    vz + w * tz + (x * ty - y * tx),
-  ];
-}
-
 function interpolate(points: Point[], time: number): Point {
   if (time <= points[0].t) return points[0];
   if (time >= points[points.length - 1].t) return points[points.length - 1];
@@ -200,11 +189,6 @@ function TableCanvas({
       context.setLineDash([]);
     });
 
-    const surfaceMarkers: [number, number, number][] = [
-      [0, 0, 1], [.86, 0, .5], [-.86, 0, .5], [0, .86, .5], [0, -.86, .5],
-      [.86, 0, -.5], [-.86, 0, -.5], [0, .86, -.5], [0, -.86, -.5], [0, 0, -1],
-    ];
-
     (drill.balls as Ball[]).forEach((ball) => {
       const trajectory = (drill.trajectories as Trajectory[]).find((item) => item.ballId === ball.id);
       const position: Point = trajectory ? interpolate(trajectory.points, time) : { ...ball, t: 0, q: IDENTITY_QUATERNION };
@@ -219,18 +203,6 @@ function TableCanvas({
       context.strokeStyle = ball.id === "CB" ? "#b7bcb7" : "#b1851e"; context.lineWidth = 1.2; context.stroke();
       context.beginPath(); context.arc(px - ballR * .28, py - ballR * .3, ballR * .24, 0, Math.PI * 2);
       context.fillStyle = "rgba(255,255,255,.35)"; context.fill();
-
-      const orientation = position.q ?? IDENTITY_QUATERNION;
-      surfaceMarkers.map((marker) => rotateVector(orientation, marker))
-        .filter((marker) => marker[2] > -.08)
-        .sort((a, b) => a[2] - b[2])
-        .forEach(([worldX, worldY, worldZ]) => {
-          const mx = px + worldY * ballR * .72;
-          const my = py + worldX * ballR * .72;
-          const markerRadius = Math.max(1.35, ballR * (.095 + Math.max(0, worldZ) * .035));
-          context.beginPath(); context.arc(mx, my, markerRadius, 0, Math.PI * 2);
-          context.fillStyle = ball.id === "CB" ? "#c83f35" : "rgba(255,255,248,.92)"; context.fill();
-        });
 
       if (ball.id !== "CB") {
         context.fillStyle = "#523e0e";
@@ -340,7 +312,7 @@ export default function Home() {
   const [time, setTime] = useState(0);
   const [speed, setSpeed] = useState(1);
   const [filter, setFilter] = useState("すべて");
-  const [view, setView] = useState<"diagram" | "player">("diagram");
+  const [view, setView] = useState<"overhead" | "player" | "diagram">("overhead");
   const [showBaseline, setShowBaseline] = useState(true);
   const [experiment, setExperiment] = useState(() => ({
     x: drillData.drills[0].cue.x,
@@ -465,12 +437,13 @@ export default function Home() {
           <div className="viewer-card">
             <div className="view-toolbar">
               <div className="view-tabs" role="group" aria-label="視点を選択">
-                <button className={view === "diagram" ? "active" : ""} onClick={() => setView("diagram")}>真上の課題図</button>
-                <button className={view === "player" ? "active" : ""} onClick={() => setView("player")}>プレイヤー視点</button>
+                <button className={view === "overhead" ? "active" : ""} onClick={() => setView("overhead")}>3D俯瞰</button>
+                <button className={view === "player" ? "active" : ""} onClick={() => setView("player")}>3Dプレイヤー</button>
+                <button className={view === "diagram" ? "active" : ""} onClick={() => setView("diagram")}>配置図</button>
               </div>
               {!isDefault && <label className="baseline-toggle"><input type="checkbox" checked={showBaseline} onChange={(event) => setShowBaseline(event.target.checked)} /> 基準軌道を重ねる</label>}
             </div>
-            <div className="viewer-labels"><span className="cb-key">手玉（赤点が回転）</span><span className="ob-key">的玉（白点が回転）</span><span className="zone-key">合格領域</span><span className="pocket-key">指定ポケット</span><span className="grid-key">0.25目盛</span></div>
+            <div className="viewer-labels"><span className="cb-key">手玉</span><span className="ob-key">的玉</span><span className="zone-key">合格領域</span><span className="pocket-key">指定ポケット</span><span className="grid-key">配置図は0.25目盛</span></div>
             {view === "diagram" ? (
               <TableCanvas drill={drill} time={time} baselineTrajectories={baselineShot.trajectories} showBaseline={!isDefault && showBaseline} />
             ) : (
@@ -482,6 +455,7 @@ export default function Home() {
                   showBaseline={!isDefault && showBaseline}
                   aimPoint={aimPoint}
                   time={time}
+                  viewMode={view}
                 />
               </Suspense>
             )}
