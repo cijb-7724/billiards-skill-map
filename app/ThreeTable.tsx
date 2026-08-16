@@ -5,8 +5,10 @@ import type { Quaternion, ShotPoint, ShotTrajectory } from "./physics";
 type ThreeDrill = {
   id: string;
   targetPocket?: string;
+  targetPockets: string[];
   balls: Array<{ id: string; label?: string; color: string; x: number; y: number }>;
   successZone: { x1: number; y1: number; x2: number; y2: number } | null;
+  zones: Array<{ x1: number; y1: number; x2: number; y2: number }>;
 };
 
 type SceneState = {
@@ -85,8 +87,8 @@ function addTrajectory(scene: THREE.Scene, trajectory: ShotTrajectory, color: st
     const previous = sampled[index - 1];
     const current = sampled[index];
     path.add(new THREE.LineCurve3(
-      new THREE.Vector3(previous.x * DIAMOND_M, .012, previous.y * DIAMOND_M),
-      new THREE.Vector3(current.x * DIAMOND_M, .012, current.y * DIAMOND_M),
+      new THREE.Vector3(previous.x * DIAMOND_M, .012, TABLE_WIDTH - previous.y * DIAMOND_M),
+      new THREE.Vector3(current.x * DIAMOND_M, .012, TABLE_WIDTH - current.y * DIAMOND_M),
     ));
   }
   const geometry = new THREE.TubeGeometry(path, Math.max(8, sampled.length * 2), opacity < .4 ? .0018 : .0034, 5, false);
@@ -332,7 +334,7 @@ function addTable(scene: THREE.Scene, drill: ThreeDrill) {
     rim.rotation.x = Math.PI / 2;
     rim.position.set(pocketPosition.x, .019, pocketPosition.z);
     scene.add(rim);
-    if (pocketPosition.id === drill.targetPocket) {
+    if (drill.targetPockets.includes(pocketPosition.id)) {
       const target = new THREE.Mesh(
         new THREE.TorusGeometry(.082, .006, 8, 48),
         new THREE.MeshBasicMaterial({ color: 0xffd468, transparent: true, opacity: .92 }),
@@ -373,7 +375,7 @@ function addSuccessZone(scene: THREE.Scene, zone: NonNullable<ThreeDrill["succes
   const width = (zone.x2 - zone.x1) * DIAMOND_M;
   const depth = (zone.y2 - zone.y1) * DIAMOND_M;
   const centerX = (zone.x1 + zone.x2) * DIAMOND_M / 2;
-  const centerZ = (zone.y1 + zone.y2) * DIAMOND_M / 2;
+  const centerZ = TABLE_WIDTH - (zone.y1 + zone.y2) * DIAMOND_M / 2;
   const fill = new THREE.Mesh(
     new THREE.PlaneGeometry(width, depth),
     new THREE.MeshBasicMaterial({ color: 0xffd36b, transparent: true, opacity: .2, side: THREE.DoubleSide }),
@@ -421,7 +423,7 @@ export function ThreeTable({
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.34;
     renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.shadowMap.type = THREE.PCFShadowMap;
 
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x263b34);
@@ -453,30 +455,30 @@ export function ThreeTable({
     scene.add(room);
 
     addTable(scene, drill);
-    if (drill.successZone) addSuccessZone(scene, drill.successZone);
+    drill.zones.forEach((zone) => addSuccessZone(scene, zone));
     if (showBaseline) baselineTrajectories.forEach((trajectory) => addTrajectory(scene, trajectory, "#d7ddd9", .28));
     trajectories.forEach((trajectory) => addTrajectory(scene, trajectory, trajectory.ballId === "CB" ? "#ffffff" : "#ffe066", .92));
 
     const groups = new Map<string, THREE.Group>();
     drill.balls.forEach((ball) => {
       const group = createBall(ball);
-      group.position.set(ball.x * DIAMOND_M, BALL_RADIUS, ball.y * DIAMOND_M);
+      group.position.set(ball.x * DIAMOND_M, BALL_RADIUS, TABLE_WIDTH - ball.y * DIAMOND_M);
       scene.add(group);
       groups.set(ball.id, group);
     });
 
     const cb = drill.balls.find((ball) => ball.id === "CB") ?? drill.balls[0];
-    const cbPosition = new THREE.Vector3(cb.x * DIAMOND_M, BALL_RADIUS, cb.y * DIAMOND_M);
+    const cbPosition = new THREE.Vector3(cb.x * DIAMOND_M, BALL_RADIUS, TABLE_WIDTH - cb.y * DIAMOND_M);
     const aimDirection = new THREE.Vector3(
       (aimPoint.x - cb.x) * DIAMOND_M,
       0,
-      (aimPoint.y - cb.y) * DIAMOND_M,
+      -(aimPoint.y - cb.y) * DIAMOND_M,
     ).normalize();
 
     const aimingLine = new THREE.Line(
       new THREE.BufferGeometry().setFromPoints([
         cbPosition.clone().addScaledVector(aimDirection, BALL_RADIUS * 1.15).setY(.013),
-        new THREE.Vector3(aimPoint.x * DIAMOND_M, .013, aimPoint.y * DIAMOND_M),
+        new THREE.Vector3(aimPoint.x * DIAMOND_M, .013, TABLE_WIDTH - aimPoint.y * DIAMOND_M),
       ]),
       new THREE.LineBasicMaterial({ color: 0xfff4d3, transparent: true, opacity: .6 }),
     );
@@ -487,7 +489,7 @@ export function ThreeTable({
       new THREE.MeshBasicMaterial({ color: 0xfff4d3, transparent: true, opacity: .72 }),
     );
     ghostBall.rotation.x = Math.PI / 2;
-    ghostBall.position.set(aimPoint.x * DIAMOND_M, .015, aimPoint.y * DIAMOND_M);
+    ghostBall.position.set(aimPoint.x * DIAMOND_M, .015, TABLE_WIDTH - aimPoint.y * DIAMOND_M);
     scene.add(ghostBall);
 
     const cue = createCue();
@@ -555,7 +557,7 @@ export function ThreeTable({
       if (!group || !trajectory) return;
       const point = interpolate(trajectory.points, time);
       group.visible = point.visible !== false;
-      group.position.set(point.x * DIAMOND_M, BALL_RADIUS, point.y * DIAMOND_M);
+      group.position.set(point.x * DIAMOND_M, BALL_RADIUS, TABLE_WIDTH - point.y * DIAMOND_M);
       group.quaternion.copy(poolQuaternionToThree(point.q));
     });
     state.cue.visible = time < .12;

@@ -4,22 +4,20 @@
 
 ## 設計方針
 
-- 課題の正本は `app/drills.json`
-- 台上の座標は長辺8、短辺4のダイヤ単位
-- `scripts/validate-drills.mjs` が球の重なり、ポケット経路、クッション接触点、合格領域への到達を検査
-- `scripts/simulate_drills.py` が pooltool 0.6 で軌道を生成し、入球と合格領域を再検査
-- サイトは同じデータを読み、真上の課題図とプレイヤー視点3Dで軌道を再生
-- 撞点と強さを変更した場合は Web Worker 内のブラウザー物理モデルで再計算
-- ブラウザー計算は pooltool の基準軌道で校正し、同一ページ内の直近20結果だけ一時保持
+- ロードマップ原稿 `../roadmap_v4.tex` の全74課題を `app/roadmapTasks.json` へ変換
+- 台上の座標は長辺8、短辺4のダイヤ単位。通常配置と合格領域は0.25目盛に統一
+- `scripts/validate-drills.mjs` が課題数、球の重なり、座標、ポケット経路、長方形領域を検査
+- 物理検証済みの課題だけ、真上とプレイヤー視点の3D再生・撞点・強さ変更を公開
+- 未検証課題は配置図と合格基準だけを表示し、誤った物理再生は行わない
+- 撞点と強さを変更した場合は Web Worker 内のブラウザー物理モデルで毎回再計算
 - 将来の課題PDFも同じJSONから生成する
 
 ## ローカル実行
 
 ```bash
 pnpm install
-python3 -m venv .venv
-.venv/bin/pip install -r requirements.txt
-.venv/bin/python scripts/simulate_drills.py
+node scripts/import-roadmap.mjs ../roadmap_v4.tex app/roadmapTasks.json
+node --import tsx scripts/generate-roadmap-trajectories.ts
 pnpm test
 pnpm run dev
 ```

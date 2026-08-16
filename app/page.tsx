@@ -1,8 +1,8 @@
 "use client";
 
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
-import drillData from "./drills.json";
-import generatedData from "./generatedTrajectories.json";
+import drillData from "./roadmapTasks.json";
+import generatedData from "./roadmapTrajectories.json";
 import type { BrowserShot, Quaternion, ShotPoint, ShotTrajectory, SimulationRequest } from "./physics";
 
 const ThreeTable = lazy(() => import("./ThreeTable").then((module) => ({ default: module.ThreeTable })));
@@ -15,9 +15,9 @@ type GeneratedShot = BrowserShot;
 
 const TABLE = { width: 8, height: 4, ballRadius: 0.09 };
 const POCKETS = [
-  { id: "左上", x: 0, y: 0 }, { id: "上中央", x: 4, y: 0 },
-  { id: "右上", x: 8, y: 0 }, { id: "左下", x: 0, y: 4 },
-  { id: "下中央", x: 4, y: 4 }, { id: "右下", x: 8, y: 4 },
+  { id: "左上", x: 0, y: 4 }, { id: "上中央", x: 4, y: 4 },
+  { id: "右上", x: 8, y: 4 }, { id: "左下", x: 0, y: 0 },
+  { id: "下中央", x: 4, y: 0 }, { id: "右下", x: 8, y: 0 },
 ];
 
 const IDENTITY_QUATERNION: Quaternion = [1, 0, 0, 0];
@@ -72,6 +72,19 @@ function TableCanvas({
   showBaseline: boolean;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [canvasSize, setCanvasSize] = useState("");
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const observer = new ResizeObserver(([entry]) => {
+      const width = Math.round(entry.contentRect.width);
+      const height = Math.round(entry.contentRect.height);
+      setCanvasSize((current) => current === `${width}x${height}` ? current : `${width}x${height}`);
+    });
+    observer.observe(canvas);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -84,13 +97,13 @@ function TableCanvas({
     if (!context) return;
     context.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-    const padX = Math.max(40, rect.width * 0.058);
-    const feltX = padX;
-    const feltW = rect.width - padX * 2;
+    const padX = Math.max(36, Math.min(58, rect.width * 0.058));
+    const feltW = Math.max(80, Math.min(rect.width - padX * 2, (rect.height - 48) * 2));
+    const feltX = (rect.width - feltW) / 2;
     const feltH = feltW / 2;
     const feltY = (rect.height - feltH) / 2;
     const sx = (x: number) => feltX + (x / TABLE.width) * feltW;
-    const sy = (y: number) => feltY + (y / TABLE.height) * feltH;
+    const sy = (y: number) => feltY + ((TABLE.height - y) / TABLE.height) * feltH;
     const ballR = Math.max(11, (0.125 / TABLE.height) * feltH);
 
     context.clearRect(0, 0, rect.width, rect.height);
@@ -150,7 +163,7 @@ function TableCanvas({
     }
 
     POCKETS.forEach((pocket) => {
-      const active = pocket.id === drill.targetPocket;
+      const active = drill.targetPockets.includes(pocket.id);
       context.beginPath();
       context.arc(sx(pocket.x), sy(pocket.y), active ? 15 : 12, 0, Math.PI * 2);
       context.fillStyle = "#111714"; context.fill();
@@ -159,16 +172,30 @@ function TableCanvas({
       }
     });
 
-    if (drill.successZone) {
-      const zone = drill.successZone;
+    drill.zones.forEach((zone) => {
       context.fillStyle = "rgba(255, 211, 107, .17)";
       context.strokeStyle = "#ffd36b";
       context.lineWidth = 2;
       context.setLineDash([7, 5]);
-      context.fillRect(sx(zone.x1), sy(zone.y1), sx(zone.x2) - sx(zone.x1), sy(zone.y2) - sy(zone.y1));
-      context.strokeRect(sx(zone.x1), sy(zone.y1), sx(zone.x2) - sx(zone.x1), sy(zone.y2) - sy(zone.y1));
+      const top = sy(zone.y2);
+      const height = sy(zone.y1) - top;
+      context.fillRect(sx(zone.x1), top, sx(zone.x2) - sx(zone.x1), height);
+      context.strokeRect(sx(zone.x1), top, sx(zone.x2) - sx(zone.x1), height);
       context.setLineDash([]);
-    }
+      if (zone.label) {
+        context.fillStyle = "#ffe29b";
+        context.font = `700 ${Math.max(8, rect.width * .009)}px system-ui`;
+        context.textAlign = "left";
+        context.fillText(zone.label, sx(zone.x1) + 5, top + 11);
+      }
+    });
+
+    drill.railAims.forEach((aim) => {
+      const px = sx(aim.x); const py = sy(aim.y);
+      context.strokeStyle = "#ff786c"; context.lineWidth = 2;
+      context.beginPath(); context.moveTo(px - 7, py - 7); context.lineTo(px + 7, py + 7);
+      context.moveTo(px + 7, py - 7); context.lineTo(px - 7, py + 7); context.stroke();
+    });
 
     if (showBaseline) baselineTrajectories.forEach((trajectory) => {
       context.beginPath();
@@ -213,7 +240,7 @@ function TableCanvas({
       context.save();
       context.shadowColor = "rgba(3,20,15,.22)"; context.shadowBlur = 3; context.shadowOffsetY = 2;
       context.beginPath(); context.arc(px, py, ballR, 0, Math.PI * 2);
-      context.fillStyle = ball.id === "CB" ? "#f1f0e9" : "#e5bb37"; context.fill();
+      context.fillStyle = ball.id === "CB" ? "#f1f0e9" : ball.color; context.fill();
       context.restore();
       context.beginPath(); context.arc(px, py, ballR, 0, Math.PI * 2);
       context.strokeStyle = ball.id === "CB" ? "#b7bcb7" : "#b1851e"; context.lineWidth = 1.2; context.stroke();
@@ -239,7 +266,7 @@ function TableCanvas({
         context.fillText(ball.label, px, py + .4);
       }
     });
-  }, [baselineTrajectories, drill, showBaseline, time]);
+  }, [baselineTrajectories, canvasSize, drill, showBaseline, time]);
 
   return <canvas ref={canvasRef} className="table-canvas" aria-label={`${drill.id}の配置と軌道`} />;
 }
@@ -251,6 +278,13 @@ function CuePoint({ x, y }: { x: number; y: number }) {
       <span className="tip" style={{ left: `${50 + x * 38}%`, top: `${50 - y * 38}%` }} />
     </div>
   );
+}
+
+function ballCoordinate(ball: Ball) {
+  const short = Math.abs(ball.y - 3.84) < .03 ? "上クッションタッチ"
+    : Math.abs(ball.y - .16) < .03 ? "下クッションタッチ"
+      : `短辺 ${ball.y.toFixed(2)}`;
+  return `長辺 ${ball.x.toFixed(2)} ／ ${short}`;
 }
 
 function CueController({ x, y, onChange }: { x: number; y: number; onChange: (x: number, y: number) => void }) {
@@ -291,6 +325,7 @@ function CueController({ x, y, onChange }: { x: number; y: number; onChange: (x:
 }
 
 function getAimPoint(drill: Drill): { x: number; y: number } {
+  if (drill.aimPoint) return drill.aimPoint;
   const cb = drill.balls.find((ball) => ball.id === "CB") ?? drill.balls[0];
   const objectBall = drill.balls.find((ball) => ball.id.startsWith("OB"));
   if (objectBall) {
@@ -330,7 +365,7 @@ export default function Home() {
   const [time, setTime] = useState(0);
   const [speed, setSpeed] = useState(1);
   const [filter, setFilter] = useState("すべて");
-  const [view, setView] = useState<"overhead" | "player" | "diagram">("overhead");
+  const [view, setView] = useState<"overhead" | "player" | "diagram">(drillData.drills[0].interactive ? "overhead" : "diagram");
   const [viewerExpanded, setViewerExpanded] = useState(false);
   const [showBaseline, setShowBaseline] = useState(true);
   const [experiment, setExperiment] = useState(() => ({
@@ -383,6 +418,7 @@ export default function Home() {
   }, [viewerExpanded]);
 
   useEffect(() => {
+    if (!authored.interactive) { requestIdRef.current += 1; setExperimentalShot(null); setCalculating(false); return; }
     if (isDefault) { requestIdRef.current += 1; setExperimentalShot(null); setCalculating(false); return; }
     const key = `${selectedId}:${experiment.x.toFixed(2)}:${experiment.y.toFixed(2)}:${experiment.speedMps.toFixed(2)}`;
     const cached = cacheRef.current.get(key);
@@ -400,13 +436,14 @@ export default function Home() {
       workerRef.current?.postMessage(request);
     }, 180);
     return () => window.clearTimeout(timeout);
-  }, [aimPoint, authored.balls, authored.cue.elevationDeg, authored.cue.speedMps, authored.cue.x, authored.cue.y, baselineShot, experiment, isDefault, selectedId]);
+  }, [aimPoint, authored.balls, authored.cue.elevationDeg, authored.cue.speedMps, authored.cue.x, authored.cue.y, authored.interactive, baselineShot, experiment, isDefault, selectedId]);
 
   useEffect(() => {
     setExperiment({ x: authored.cue.x, y: authored.cue.y, speedMps: authored.cue.speedMps });
     setExperimentalShot(null);
     setTime(0);
     setPlaying(false);
+    setView(authored.interactive ? "overhead" : "diagram");
   }, [authored.cue.speedMps, authored.cue.x, authored.cue.y, selectedId]);
   useEffect(() => {
     if (!playing) { previous.current = null; if (frame.current) cancelAnimationFrame(frame.current); return; }
@@ -431,14 +468,14 @@ export default function Home() {
     <main>
       <header className="topbar">
         <div className="brand"><span className="brand-mark">B</span><div><strong>ビリヤード技能地図</strong><small>検証可能な練習ロードマップ</small></div></div>
-        <div className="header-status"><span className="live-dot" /> 課題データ版 0.1</div>
+        <div className="header-status"><span className="live-dot" /> 全74課題版 0.2</div>
       </header>
 
       <div className="app-shell">
         <aside className="sidebar">
           <div className="sidebar-heading"><span>テーマ</span><b>{drillData.chapters.length}</b></div>
           <div className="filters">
-            {["すべて", "公開中", "設計中"].map((value) => <button key={value} className={filter === value ? "active" : ""} onClick={() => setFilter(value)}>{value}</button>)}
+            {["すべて", "公開中", "再検証中"].map((value) => <button key={value} className={filter === value ? "active" : ""} onClick={() => setFilter(value)}>{value}</button>)}
           </div>
           <nav aria-label="課題テーマ">
             {visibleChapters.map((chapter) => (
@@ -466,8 +503,8 @@ export default function Home() {
           <div className={`viewer-card ${viewerExpanded ? "expanded" : ""}`}>
             <div className="view-toolbar">
               <div className="view-tabs" role="group" aria-label="視点を選択">
-                <button className={view === "overhead" ? "active" : ""} onClick={() => setView("overhead")}>3D俯瞰</button>
-                <button className={view === "player" ? "active" : ""} onClick={() => setView("player")}>3Dプレイヤー</button>
+                {authored.interactive && <button className={view === "overhead" ? "active" : ""} onClick={() => setView("overhead")}>3D俯瞰</button>}
+                {authored.interactive && <button className={view === "player" ? "active" : ""} onClick={() => setView("player")}>3Dプレイヤー</button>}
                 <button className={view === "diagram" ? "active" : ""} onClick={() => setView("diagram")}>配置図</button>
               </div>
               <div className="viewer-actions">
@@ -476,7 +513,7 @@ export default function Home() {
               </div>
             </div>
             <div className="viewer-labels"><span className="cb-key">手玉</span><span className="ob-key">的玉</span><span className="zone-key">合格領域</span><span className="pocket-key">指定ポケット</span><span className="grid-key">配置図は0.25目盛</span></div>
-            <div className="expanded-cue-point"><CuePoint x={experiment.x} y={experiment.y} /><span>現在の撞点</span></div>
+            {authored.interactive && <div className="expanded-cue-point"><CuePoint x={experiment.x} y={experiment.y} /><span>現在の撞点</span></div>}
             {view === "diagram" ? (
               <TableCanvas drill={drill} time={time} baselineTrajectories={baselineShot.trajectories} showBaseline={!isDefault && showBaseline} />
             ) : (
@@ -492,16 +529,16 @@ export default function Home() {
                 />
               </Suspense>
             )}
-            <div className="timeline">
+            {authored.interactive && <div className="timeline">
               <button className="play" onClick={() => { if (time >= drill.duration) setTime(0); setPlaying(!playing); }} aria-label={playing ? "一時停止" : "再生"}>{playing ? "Ⅱ" : "▶"}</button>
               <button onClick={() => { setTime(0); setPlaying(false); }} aria-label="最初に戻る">↺</button>
               <input type="range" min="0" max={drill.duration} step="0.01" value={time} onChange={(event) => { setTime(Number(event.target.value)); setPlaying(false); }} aria-label="再生位置" />
               <span>{time.toFixed(1)} / {drill.duration.toFixed(1)}秒</span>
               <select value={speed} onChange={(event) => setSpeed(Number(event.target.value))} aria-label="再生速度"><option value="0.5">0.5倍</option><option value="1">1倍</option><option value="1.5">1.5倍</option></select>
-            </div>
+            </div>}
           </div>
 
-          <section className="experiment-panel" aria-labelledby="experiment-title">
+          {authored.interactive ? <section className="experiment-panel" aria-labelledby="experiment-title">
             <div className="experiment-heading">
               <div><span>その場で再計算</span><h2 id="experiment-title">撞点と強さを変えて比較</h2></div>
               <div className={`experiment-status ${calculating ? "calculating" : ""}`}><i />{calculating ? "計算中" : isDefault ? "課題の基準設定" : evaluateExperiment(authored, activeShot)}</div>
@@ -518,10 +555,10 @@ export default function Home() {
                 <button onClick={() => setExperiment({ x: authored.cue.x, y: authored.cue.y, speedMps: authored.cue.speedMps })}>課題設定に戻す</button>
               </div>
             </div>
-          </section>
+          </section> : <section className="verification-notice"><b>配置図と合格基準を先行公開</b><span>この課題は達成可能な撞点・強さを再検証中です。確認が終わるまで3D再生とパラメーター変更は表示しません。</span></section>}
 
           <div className="instruction-grid">
-            <article><span className="card-index">01</span><h2>配置</h2><p>{drill.setup}</p><div className="coordinate-guide">長辺は左から0〜8、短辺は上から0〜4。細線1区画が0.25です。</div><div className="coordinates">{drill.balls.map((ball) => <span key={ball.id}><b>{ball.id}</b>　長辺 {ball.x.toFixed(2)} ／ 短辺 {ball.y.toFixed(2)}</span>)}</div></article>
+            <article><span className="card-index">01</span><h2>配置</h2><p>{drill.setup}</p><div className="coordinate-guide">長辺は左から0〜8、短辺は下から0〜4。細線1区画が0.25です。</div><div className="coordinates">{drill.balls.map((ball) => <span key={ball.id}><b>{ball.id}</b>　{ballCoordinate(ball)}</span>)}</div></article>
             <article><span className="card-index">02</span><h2>撞き方</h2><div className="cue-layout"><CuePoint x={drill.cue.x} y={drill.cue.y} /><div><b>{drill.cue.label}</b><p>強さ：{drill.cue.speed}</p><p>キュー角：{drill.cue.elevation}</p></div></div></article>
             <article><span className="card-index">03</span><h2>合格</h2><p>{drill.success}</p>{drill.successZone && <div className="zone-numbers">長辺 {drill.successZone.x1}–{drill.successZone.x2}<br />短辺 {drill.successZone.y1}–{drill.successZone.y2}</div>}</article>
           </div>

@@ -1,60 +1,376 @@
 {
-  "generatedAt": "2026-08-16T18:33:28.447Z",
-  "table": {
-    "width": 8,
-    "height": 4,
-    "radius": 0.09,
-    "pocketMouth": 0.24
-  },
-  "total": 8,
-  "passed": 8,
+  "generatedAt": "2026-08-16T20:05:17.629Z",
+  "total": 74,
+  "passed": 74,
   "results": [
     {
-      "id": "K00-01",
+      "id": "R0-01",
       "status": "合格",
-      "checks": 9,
       "errors": []
     },
     {
-      "id": "K01-01",
+      "id": "R0-02",
       "status": "合格",
-      "checks": 9,
       "errors": []
     },
     {
-      "id": "K01-02",
+      "id": "R0-03",
       "status": "合格",
-      "checks": 9,
       "errors": []
     },
     {
-      "id": "K01-03",
+      "id": "R1-01",
       "status": "合格",
-      "checks": 9,
       "errors": []
     },
     {
-      "id": "K02-01",
+      "id": "R1-02",
       "status": "合格",
-      "checks": 9,
       "errors": []
     },
     {
-      "id": "K04-01",
+      "id": "R1-03",
       "status": "合格",
-      "checks": 9,
       "errors": []
     },
     {
-      "id": "K06-01",
+      "id": "R1-04",
       "status": "合格",
-      "checks": 9,
       "errors": []
     },
     {
-      "id": "K06-02",
+      "id": "R1-05",
       "status": "合格",
-      "checks": 9,
+      "errors": []
+    },
+    {
+      "id": "R1-06",
+      "status": "合格",
+      "errors": []
+    },
+    {
+      "id": "R2-01",
+      "status": "合格",
+      "errors": []
+    },
+    {
+      "id": "R2-02",
+      "status": "合格",
+      "errors": []
+    },
+    {
+      "id": "R2-03a",
+      "status": "合格",
+      "errors": []
+    },
+    {
+      "id": "R2-03b",
+      "status": "合格",
+      "errors": []
+    },
+    {
+      "id": "R2-04a",
+      "status": "合格",
+      "errors": []
+    },
+    {
+      "id": "R2-04b",
+      "status": "合格",
+      "errors": []
+    },
+    {
+      "id": "R2-05a",
+      "status": "合格",
+      "errors": []
+    },
+    {
+      "id": "R2-05b",
+      "status": "合格",
+      "errors": []
+    },
+    {
+      "id": "R3-01",
+      "status": "合格",
+      "errors": []
+    },
+    {
+      "id": "R3-02",
+      "status": "合格",
+      "errors": []
+    },
+    {
+      "id": "R3-03",
+      "status": "合格",
+      "errors": []
+    },
+    {
+      "id": "R3-04",
+      "status": "合格",
+      "errors": []
+    },
+    {
+      "id": "R3-05",
+      "status": "合格",
+      "errors": []
+    },
+    {
+      "id": "R4-01",
+      "status": "合格",
+      "errors": []
+    },
+    {
+      "id": "R4-02",
+      "status": "合格",
+      "errors": []
+    },
+    {
+      "id": "R4-03",
+      "status": "合格",
+      "errors": []
+    },
+    {
+      "id": "R4-04",
+      "status": "合格",
+      "errors": []
+    },
+    {
+      "id": "R4-05",
+      "status": "合格",
+      "errors": []
+    },
+    {
+      "id": "R4-06",
+      "status": "合格",
+      "errors": []
+    },
+    {
+      "id": "R4-07",
+      "status": "合格",
+      "errors": []
+    },
+    {
+      "id": "R4-08",
+      "status": "合格",
+      "errors": []
+    },
+    {
+      "id": "R5-01",
+      "status": "合格",
+      "errors": []
+    },
+    {
+      "id": "R5-02",
+      "status": "合格",
+      "errors": []
+    },
+    {
+      "id": "R5-03",
+      "status": "合格",
+      "errors": []
+    },
+    {
+      "id": "R5-04",
+      "status": "合格",
+      "errors": []
+    },
+    {
+      "id": "R5-05",
+      "status": "合格",
+      "errors": []
+    },
+    {
+      "id": "R5-06",
+      "status": "合格",
+      "errors": []
+    },
+    {
+      "id": "R5-07",
+      "status": "合格",
+      "errors": []
+    },
+    {
+      "id": "R5-08",
+      "status": "合格",
+      "errors": []
+    },
+    {
+      "id": "R6-01",
+      "status": "合格",
+      "errors": []
+    },
+    {
+      "id": "R6-02",
+      "status": "合格",
+      "errors": []
+    },
+    {
+      "id": "R6-03",
+      "status": "合格",
+      "errors": []
+    },
+    {
+      "id": "R6-04",
+      "status": "合格",
+      "errors": []
+    },
+    {
+      "id": "R7-01",
+      "status": "合格",
+      "errors": []
+    },
+    {
+      "id": "R7-02",
+      "status": "合格",
+      "errors": []
+    },
+    {
+      "id": "R7-03",
+      "status": "合格",
+      "errors": []
+    },
+    {
+      "id": "R7-04",
+      "status": "合格",
+      "errors": []
+    },
+    {
+      "id": "R7-05",
+      "status": "合格",
+      "errors": []
+    },
+    {
+      "id": "R7-06",
+      "status": "合格",
+      "errors": []
+    },
+    {
+      "id": "R8-01",
+      "status": "合格",
+      "errors": []
+    },
+    {
+      "id": "R8-02",
+      "status": "合格",
+      "errors": []
+    },
+    {
+      "id": "R8-03",
+      "status": "合格",
+      "errors": []
+    },
+    {
+      "id": "R8-04",
+      "status": "合格",
+      "errors": []
+    },
+    {
+      "id": "R8-05",
+      "status": "合格",
+      "errors": []
+    },
+    {
+      "id": "R8-06",
+      "status": "合格",
+      "errors": []
+    },
+    {
+      "id": "R9-01",
+      "status": "合格",
+      "errors": []
+    },
+    {
+      "id": "R9-02",
+      "status": "合格",
+      "errors": []
+    },
+    {
+      "id": "R9-03",
+      "status": "合格",
+      "errors": []
+    },
+    {
+      "id": "R9-04",
+      "status": "合格",
+      "errors": []
+    },
+    {
+      "id": "R9-05",
+      "status": "合格",
+      "errors": []
+    },
+    {
+      "id": "R10-01",
+      "status": "合格",
+      "errors": []
+    },
+    {
+      "id": "R10-02",
+      "status": "合格",
+      "errors": []
+    },
+    {
+      "id": "R10-03",
+      "status": "合格",
+      "errors": []
+    },
+    {
+      "id": "R10-04",
+      "status": "合格",
+      "errors": []
+    },
+    {
+      "id": "R10-05",
+      "status": "合格",
+      "errors": []
+    },
+    {
+      "id": "R11-01",
+      "status": "合格",
+      "errors": []
+    },
+    {
+      "id": "R11-02",
+      "status": "合格",
+      "errors": []
+    },
+    {
+      "id": "R11-03",
+      "status": "合格",
+      "errors": []
+    },
+    {
+      "id": "R11-04",
+      "status": "合格",
+      "errors": []
+    },
+    {
+      "id": "R11-05",
+      "status": "合格",
+      "errors": []
+    },
+    {
+      "id": "R12-01",
+      "status": "合格",
+      "errors": []
+    },
+    {
+      "id": "R12-02",
+      "status": "合格",
+      "errors": []
+    },
+    {
+      "id": "R12-03",
+      "status": "合格",
+      "errors": []
+    },
+    {
+      "id": "R12-04",
+      "status": "合格",
+      "errors": []
+    },
+    {
+      "id": "R12-05",
+      "status": "合格",
       "errors": []
     }
   ],
