@@ -34,7 +34,7 @@
       "number": "R2",
       "title": "分離",
       "summary": "90度・30度・ドロー分離",
-      "status": "再検証中",
+      "status": "公開中",
       "drills": [
         "R2-01",
         "R2-02",
@@ -455,7 +455,7 @@
         "y": 0,
         "label": "撞点（+0.00, +0.00）",
         "speed": "S1",
-        "speedMps": 0.55,
+        "speedMps": 0.5,
         "elevation": "ほぼ水平",
         "elevationDeg": 5
       },
@@ -1210,7 +1210,7 @@
       "cue": {
         "x": 0,
         "y": -0.4,
-        "label": "撞点（+0.00, -0.35）",
+        "label": "撞点（+0.00, -0.40）",
         "speed": "S3",
         "speedMps": 1.85,
         "elevation": "ほぼ水平",
@@ -1370,7 +1370,7 @@
         "y": -0.5,
         "label": "撞点（+0.00, -0.50）",
         "speed": "S3",
-        "speedMps": 2.4,
+        "speedMps": 2.45,
         "elevation": "ほぼ水平",
         "elevationDeg": 5
       },
@@ -1622,14 +1622,14 @@
         "body": "座標から作った約30度カット。見た目の厚みで定義しない。"
       },
       "validation": {
-        "geometry": "再検証中",
-        "geometryNote": "PDFから移植。座標、クッション接触順、入球線を再計算する。",
-        "physics": "再検証中",
-        "physicsNote": "達成可能な撞点・強さを探索してから公開する。",
+        "geometry": "幾何確認済み",
+        "geometryNote": "球中心、入球線、クッション接触と合格領域を確認。",
+        "physics": "ブラウザー物理確認済み",
+        "physicsNote": "既定撞点・強さで入球または合格領域への到達を確認。",
         "provenance": "ロードマップPDF",
         "source": "R2-01"
       },
-      "interactive": false,
+      "interactive": true,
       "authoredDiagram": true
     },
     {
@@ -1744,14 +1744,14 @@
         "body": "左右の構え差を検出する。"
       },
       "validation": {
-        "geometry": "再検証中",
-        "geometryNote": "PDFから移植。座標、クッション接触順、入球線を再計算する。",
-        "physics": "再検証中",
-        "physicsNote": "達成可能な撞点・強さを探索してから公開する。",
+        "geometry": "幾何確認済み",
+        "geometryNote": "球中心、入球線、クッション接触と合格領域を確認。",
+        "physics": "ブラウザー物理確認済み",
+        "physicsNote": "既定撞点・強さで入球または合格領域への到達を確認。",
         "provenance": "ロードマップPDF",
         "source": "R2-02"
       },
-      "interactive": false,
+      "interactive": true,
       "authoredDiagram": true
     },
     {
@@ -1769,10 +1769,10 @@
       },
       "cue": {
         "x": 0,
-        "y": 0,
-        "label": "撞点（+0.00, +0.00）",
+        "y": -0.05,
+        "label": "撞点（+0.00, -0.05）",
         "speed": "S1",
-        "speedMps": 0.8,
+        "speedMps": 0.7,
         "elevation": "ほぼ水平",
         "elevationDeg": 5
       },
@@ -1902,14 +1902,14 @@
         "body": "短いタンジェント線を固定する。"
       },
       "validation": {
-        "geometry": "再検証中",
-        "geometryNote": "PDFから移植。座標、クッション接触順、入球線を再計算する。",
-        "physics": "再検証中",
-        "physicsNote": "達成可能な撞点・強さを探索してから公開する。",
+        "geometry": "幾何確認済み",
+        "geometryNote": "球中心、入球線、クッション接触と合格領域を確認。",
+        "physics": "ブラウザー物理確認済み",
+        "physicsNote": "既定撞点・強さで入球または合格領域への到達を確認。",
         "provenance": "ロードマップPDF",
         "source": "R2-03a"
       },
-      "interactive": false,
+      "interactive": true,
       "authoredDiagram": true
     },
     {
@@ -1927,10 +1927,10 @@
       },
       "cue": {
         "x": 0,
-        "y": 0,
-        "label": "撞点（+0.00, +0.00）",
-        "speed": "S2",
-        "speedMps": 1.45,
+        "y": -0.35,
+        "label": "撞点（+0.00, -0.35）",
+        "speed": "S3",
+        "speedMps": 1.8,
         "elevation": "ほぼ水平",
         "elevationDeg": 5
       },
@@ -2060,14 +2060,14 @@
         "body": "角度は撞点、距離は主に速度で管理する。"
       },
       "validation": {
-        "geometry": "再検証中",
-        "geometryNote": "PDFから移植。座標、クッション接触順、入球線を再計算する。",
-        "physics": "再検証中",
-        "physicsNote": "達成可能な撞点・強さを探索してから公開する。",
+        "geometry": "幾何確認済み",
+        "geometryNote": "球中心、入球線、クッション接触と合格領域を確認。",
+        "physics": "ブラウザー物理確認済み",
+        "physicsNote": "既定撞点・強さで入球または合格領域への到達を確認。",
         "provenance": "ロードマップPDF",
         "source": "R2-03b"
       },
-      "interactive": false,
+      "interactive": true,
       "authoredDiagram": true
     },
     {
@@ -2088,7 +2088,7 @@
         "y": 0.45,
         "label": "撞点（+0.00, +0.45）",
         "speed": "S1",
-        "speedMps": 0.8,
+        "speedMps": 0.75,
         "elevation": "ほぼ水平",
         "elevationDeg": 5
       },
@@ -2218,14 +2218,14 @@
         "body": "30度の基準線を視覚と結果で結ぶ。"
       },
       "validation": {
-        "geometry": "再検証中",
-        "geometryNote": "PDFから移植。座標、クッション接触順、入球線を再計算する。",
-        "physics": "再検証中",
-        "physicsNote": "達成可能な撞点・強さを探索してから公開する。",
+        "geometry": "幾何確認済み",
+        "geometryNote": "球中心、入球線、クッション接触と合格領域を確認。",
+        "physics": "ブラウザー物理確認済み",
+        "physicsNote": "既定撞点・強さで入球または合格領域への到達を確認。",
         "provenance": "ロードマップPDF",
         "source": "R2-04a"
       },
-      "interactive": false,
+      "interactive": true,
       "authoredDiagram": true
     },
     {
@@ -2245,8 +2245,8 @@
         "x": 0,
         "y": 0.45,
         "label": "撞点（+0.00, +0.45）",
-        "speed": "S2",
-        "speedMps": 1.45,
+        "speed": "S1～S2",
+        "speedMps": 0.9,
         "elevation": "ほぼ水平",
         "elevationDeg": 5
       },
@@ -2300,7 +2300,7 @@
         }
       ],
       "successBallId": "CB",
-      "successMode": "stop",
+      "successMode": "pass",
       "duration": 2,
       "trajectories": [
         {
@@ -2376,14 +2376,14 @@
         "body": "同じ分離線上で速度を変える。"
       },
       "validation": {
-        "geometry": "再検証中",
-        "geometryNote": "PDFから移植。座標、クッション接触順、入球線を再計算する。",
-        "physics": "再検証中",
-        "physicsNote": "達成可能な撞点・強さを探索してから公開する。",
+        "geometry": "幾何確認済み",
+        "geometryNote": "球中心、入球線、クッション接触と合格領域を確認。",
+        "physics": "ブラウザー物理確認済み",
+        "physicsNote": "既定撞点・強さで入球または合格領域への到達を確認。",
         "provenance": "ロードマップPDF",
         "source": "R2-04b"
       },
-      "interactive": false,
+      "interactive": true,
       "authoredDiagram": true
     },
     {
@@ -2401,10 +2401,10 @@
       },
       "cue": {
         "x": 0,
-        "y": -0.35,
-        "label": "撞点（+0.00, -0.35）",
-        "speed": "S2",
-        "speedMps": 1.45,
+        "y": -0.5,
+        "label": "撞点（+0.00, -0.50）",
+        "speed": "S3",
+        "speedMps": 2.1,
         "elevation": "ほぼ水平",
         "elevationDeg": 5
       },
@@ -2534,14 +2534,14 @@
         "body": "ドロー分離の曲線を覚える。"
       },
       "validation": {
-        "geometry": "再検証中",
-        "geometryNote": "PDFから移植。座標、クッション接触順、入球線を再計算する。",
-        "physics": "再検証中",
-        "physicsNote": "達成可能な撞点・強さを探索してから公開する。",
+        "geometry": "幾何確認済み",
+        "geometryNote": "球中心、入球線、クッション接触と合格領域を確認。",
+        "physics": "ブラウザー物理確認済み",
+        "physicsNote": "既定撞点・強さで入球または合格領域への到達を確認。",
         "provenance": "ロードマップPDF",
         "source": "R2-05a"
       },
-      "interactive": false,
+      "interactive": true,
       "authoredDiagram": true
     },
     {
@@ -2559,10 +2559,10 @@
       },
       "cue": {
         "x": 0,
-        "y": -0.5,
-        "label": "撞点（+0.00, -0.50）",
+        "y": -0.55,
+        "label": "撞点（+0.00, -0.55）",
         "speed": "S3",
-        "speedMps": 2.15,
+        "speedMps": 2.45,
         "elevation": "ほぼ水平",
         "elevationDeg": 5
       },
@@ -2692,14 +2692,14 @@
         "body": "指定動画の分離練習を、衝突する目標球ではなく空の長方形で採点する。"
       },
       "validation": {
-        "geometry": "再検証中",
-        "geometryNote": "PDFから移植。座標、クッション接触順、入球線を再計算する。",
-        "physics": "再検証中",
-        "physicsNote": "達成可能な撞点・強さを探索してから公開する。",
+        "geometry": "幾何確認済み",
+        "geometryNote": "球中心、入球線、クッション接触と合格領域を確認。",
+        "physics": "ブラウザー物理確認済み",
+        "physicsNote": "既定撞点・強さで入球または合格領域への到達を確認。",
         "provenance": "ロードマップPDF",
         "source": "R2-05b"
       },
-      "interactive": false,
+      "interactive": true,
       "authoredDiagram": true
     },
     {

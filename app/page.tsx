@@ -12,6 +12,7 @@ type Ball = { id: string; label: string; color: string; x: number; y: number };
 type Trajectory = ShotTrajectory;
 type Drill = (typeof drillData.drills)[number];
 type GeneratedShot = BrowserShot;
+type PageKey = "home" | "roadmap" | "exams";
 
 const TABLE = { width: 8, height: 4, ballRadius: 0.09 };
 const POCKETS = [
@@ -253,7 +254,8 @@ function TableCanvas({
         .sort((a, b) => a[2] - b[2])
         .forEach(([worldX, worldY, worldZ]) => {
           const mx = px + worldY * ballR * .72;
-          const my = py + worldX * ballR * .72;
+          // 台の短辺座標は画面の下から上へ増えるため、CanvasのY軸とは逆。
+          const my = py - worldX * ballR * .72;
           const markerRadius = Math.max(1.35, ballR * (.095 + Math.max(0, worldZ) * .035));
           context.beginPath(); context.arc(mx, my, markerRadius, 0, Math.PI * 2);
           context.fillStyle = ball.id === "CB" ? "#c83f35" : "rgba(255,255,248,.92)"; context.fill();
@@ -359,7 +361,42 @@ function evaluateExperiment(drill: Drill, shot: BrowserShot) {
   return reached ? "合格条件を満たす予測" : "合格領域を外れる予測";
 }
 
+function HomeLanding({ onNavigate }: { onNavigate: (page: PageKey, drillId?: string) => void }) {
+  const published = drillData.drills.filter((drill) => drill.interactive).length;
+  return (
+    <section className="home-page">
+      <div className="home-hero">
+        <div><span>練習を、順番と合格基準でつなぐ</span><h1>ビリヤード技能地図</h1><p>C級の基礎からA・S級帯まで、配置・撞点・強さ・合格領域を同じ形式で確認できます。検証済み課題では3D再生と撞点変更も試せます。</p><div className="hero-actions"><button onClick={() => onNavigate("roadmap", "R0-01")}>最初の課題から始める</button><button className="secondary" onClick={() => onNavigate("exams")}>過去問ページを見る</button></div></div>
+        <div className="home-summary"><strong>{published}</strong><span>物理検証済み課題</span><small>全74課題を順次検証中</small></div>
+      </div>
+
+      <section className="how-section"><div className="section-heading"><span>使い方</span><h2>1課題ずつ、再現して、合格を記録する</h2></div><div className="how-grid">
+        <article><b>01</b><h3>配置する</h3><p>台の0.25目盛と長方形領域を使い、手玉と的玉を同じ位置へ置きます。</p></article>
+        <article><b>02</b><h3>基準を再生する</h3><p>配置図と3D表示で、撞点・強さ・分離方向・停止位置を確認します。</p></article>
+        <article><b>03</b><h3>合格まで反復する</h3><p>「何回中何回」を2回の来場で満たしたら、次の課題へ進みます。</p></article>
+      </div></section>
+
+      <section className="roadmap-section"><div className="section-heading"><span>テーマ一覧</span><h2>基礎から上級循環までのロードマップ</h2><p>緑は3D検証済み、薄色は配置図を公開して物理条件を再検証中です。</p></div><div className="roadmap-flow">
+        {drillData.chapters.map((chapter, index) => <button key={chapter.id} className={chapter.status === "公開中" ? "ready" : "pending"} onClick={() => onNavigate("roadmap", chapter.drills[0])}><small>{String(index + 1).padStart(2, "0")}</small><b>{chapter.number}　{chapter.title}</b><span>{chapter.summary}</span><em>{chapter.status}</em></button>)}
+      </div></section>
+    </section>
+  );
+}
+
+function ExamsPage({ onRoadmap }: { onRoadmap: () => void }) {
+  return (
+    <section className="exams-page">
+      <div className="page-intro"><span>過去問ビューア</span><h1>過去問も同じ課題形式で確認</h1><p>配置図、指定ポケット、撞点、合格条件、3D再生を練習課題と同じ操作で見られるページです。問題データの登録後、年度・級・種目で絞り込めるようにします。</p></div>
+      <div className="exam-layout">
+        <aside className="exam-filters"><h2>絞り込み</h2><label>区分<select disabled><option>ビリヤード検定</option></select></label><label>級<select disabled><option>すべての級</option></select></label><label>年度<select disabled><option>すべての年度</option></select></label></aside>
+        <div className="exam-empty"><div className="exam-table-mini"><i /><i /><i /><i /><i /><i /><span /></div><span>課題データ準備中</span><h2>過去問ビューアの表示枠を用意しました</h2><p>公開資料の出典、年度、級、課題番号を保持し、通常カリキュラムとは別に検索できる構成です。過去問をロードマップの進級条件には混ぜません。</p><button onClick={onRoadmap}>練習ロードマップへ戻る</button></div>
+      </div>
+    </section>
+  );
+}
+
 export default function Home() {
+  const [screen, setScreen] = useState<PageKey>("home");
   const [selectedId, setSelectedId] = useState(drillData.drills[0].id);
   const [playing, setPlaying] = useState(false);
   const [time, setTime] = useState(0);
@@ -389,6 +426,22 @@ export default function Home() {
     && Math.abs(experiment.speedMps - authored.cue.speedMps) < .001;
   const activeShot = isDefault || !experimentalShot ? baselineShot : experimentalShot;
   const drill = useMemo(() => ({ ...authored, duration: activeShot.duration, trajectories: activeShot.trajectories }) as unknown as Drill, [activeShot, authored]);
+
+  const navigate = (page: PageKey, drillId?: string) => {
+    if (drillId) setSelectedId(drillId);
+    setScreen(page);
+    window.location.hash = page === "home" ? "" : page;
+  };
+
+  useEffect(() => {
+    const readHash = () => {
+      const value = window.location.hash.replace("#", "");
+      setScreen(value === "roadmap" || value === "exams" ? value : "home");
+    };
+    readHash();
+    window.addEventListener("hashchange", readHash);
+    return () => window.removeEventListener("hashchange", readHash);
+  }, []);
 
   useEffect(() => {
     const worker = new Worker(new URL("./physics.worker.ts", import.meta.url), { type: "module" });
@@ -467,11 +520,12 @@ export default function Home() {
   return (
     <main>
       <header className="topbar">
-        <div className="brand"><span className="brand-mark">B</span><div><strong>ビリヤード技能地図</strong><small>検証可能な練習ロードマップ</small></div></div>
-        <div className="header-status"><span className="live-dot" /> 全74課題版 0.2</div>
+        <button className="brand" onClick={() => navigate("home")}><span className="brand-mark">B</span><span><strong>ビリヤード技能地図</strong><small>検証可能な練習ロードマップ</small></span></button>
+        <nav className="global-nav" aria-label="メインメニュー"><button className={screen === "home" ? "active" : ""} onClick={() => navigate("home")}>ホーム</button><button className={screen === "roadmap" ? "active" : ""} onClick={() => navigate("roadmap")}>練習ロードマップ</button><button className={screen === "exams" ? "active" : ""} onClick={() => navigate("exams")}>過去問</button></nav>
+        <div className="header-status"><span className="live-dot" /> {drillData.drills.filter((item) => item.interactive).length}課題を3D公開中</div>
       </header>
 
-      <div className="app-shell">
+      {screen === "home" ? <HomeLanding onNavigate={navigate} /> : screen === "exams" ? <ExamsPage onRoadmap={() => navigate("roadmap")} /> : <div className="app-shell">
         <aside className="sidebar">
           <div className="sidebar-heading"><span>テーマ</span><b>{drillData.chapters.length}</b></div>
           <div className="filters">
@@ -565,7 +619,7 @@ export default function Home() {
 
           <article className="why-card"><div><span>この課題で覚えること</span><h2>{drill.knowledge.title}</h2></div><p>{drill.knowledge.body}</p></article>
         </section>
-      </div>
+      </div>}
     </main>
   );
 }

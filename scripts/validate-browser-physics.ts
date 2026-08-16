@@ -3,6 +3,10 @@ import { simulateBrowserShot, type BrowserShot, type SimulationRequest } from ".
 
 const BALL_RADIUS_DIAMOND = .09;
 const POCKETS = [[0, 0], [4, 0], [8, 0], [0, 4], [4, 4], [8, 4]];
+const POCKET_MAP: Record<string, [number, number]> = {
+  左上: [0, 4], 上中央: [4, 4], 右上: [8, 4],
+  左下: [0, 0], 下中央: [4, 0], 右下: [8, 0],
+};
 
 const errors: string[] = [];
 let slowest = 0;
@@ -43,6 +47,25 @@ function validateShot(drillId: string, label: string, shot: BrowserShot) {
   }
 }
 
+function validateGoal(drill: (typeof drills.drills)[number], shot: BrowserShot) {
+  const cueTrajectory = shot.trajectories.find((trajectory) => trajectory.ballId === "CB");
+  if (cueTrajectory?.points.at(-1)?.visible === false) errors.push(`${drill.id} 基準: 手玉がスクラッチします`);
+  if (drill.targetPocket) {
+    const pocket = POCKET_MAP[drill.targetPocket];
+    const objectEnd = shot.trajectories.find((trajectory) => trajectory.ballId === "OB1")?.points.at(-1);
+    if (!pocket || !objectEnd || objectEnd.visible !== false || Math.hypot(objectEnd.x - pocket[0], objectEnd.y - pocket[1]) > .25) {
+      errors.push(`${drill.id} 基準: 指定ポケットへ入球しません`);
+    }
+  }
+  if (drill.successZone && drill.successBallId) {
+    const trajectory = shot.trajectories.find((candidate) => candidate.ballId === drill.successBallId);
+    const inside = (point: { x: number; y: number }) => point.x >= drill.successZone!.x1 && point.x <= drill.successZone!.x2
+      && point.y >= drill.successZone!.y1 && point.y <= drill.successZone!.y2;
+    const reached = trajectory && (drill.successMode === "pass" ? trajectory.points.some(inside) : inside(trajectory.points.at(-1)!));
+    if (!reached) errors.push(`${drill.id} 基準: 合格領域へ到達しません`);
+  }
+}
+
 const interactiveDrills = drills.drills.filter((drill) => drill.interactive);
 for (const drill of interactiveDrills) {
   const baselineCue = {
@@ -57,7 +80,9 @@ for (const drill of interactiveDrills) {
     aimPoint: drill.aimPoint,
     cue: baselineCue,
   };
-  validateShot(drill.id, "基準", simulateBrowserShot(request));
+  const baselineShot = simulateBrowserShot(request);
+  validateShot(drill.id, "基準", baselineShot);
+  validateGoal(drill, baselineShot);
   validateShot(drill.id, "微調整", simulateBrowserShot({
     ...request,
     cue: { ...baselineCue, x: Math.max(-.8, Math.min(.8, baselineCue.x + .05)), speedMps: Math.min(3.5, baselineCue.speedMps + .05) },

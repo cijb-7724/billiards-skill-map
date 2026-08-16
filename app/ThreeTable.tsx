@@ -61,7 +61,7 @@ function poolQuaternionToThree([w, x, y, z]: Quaternion) {
   const basis = new THREE.Matrix4().set(
     0, 1, 0, 0,
     0, 0, 1, 0,
-    1, 0, 0, 0,
+    -1, 0, 0, 0,
     0, 0, 0, 1,
   );
   const converted = basis.clone().multiply(poolRotation).multiply(basis.clone().invert());

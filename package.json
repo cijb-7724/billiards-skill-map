@@ -12,6 +12,7 @@
     "test": "node scripts/validate-drills.mjs && pnpm run validate:browser-physics && pnpm run build",
     "validate:drills": "node scripts/validate-drills.mjs",
     "validate:browser-physics": "node --import tsx scripts/validate-browser-physics.ts",
+    "tune:r2": "node --import tsx scripts/tune-r2.ts",
     "simulate": ".venv/bin/python scripts/simulate_drills.py"
   },
   "dependencies": {

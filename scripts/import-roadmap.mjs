@@ -371,18 +371,27 @@ for (const task of tasks) {
 const verifiedSettings = {
   "R0-01": { x: 0, y: .25, speedMps: 1.75, speed: "S3" },
   "R0-02": { x: 0, y: .25, speedMps: 1.2, speed: "S2（基準表示）" },
-  "R0-03": { x: 0, y: 0, speedMps: .55, speed: "S1" },
+  "R0-03": { x: 0, y: 0, speedMps: .5, speed: "S1" },
   "R1-01": { x: 0, y: .25, speedMps: .7, speed: "S1" },
   "R1-02": { x: 0, y: -.15, speedMps: 1.45, speed: "S2" },
   "R1-03": { x: 0, y: .25, speedMps: .8, speed: "S1" },
   "R1-04": { x: 0, y: .45, speedMps: 1.1, speed: "S1" },
   "R1-05": { x: 0, y: -.4, speedMps: 1.85, speed: "S3" },
-  "R1-06": { x: 0, y: -.5, speedMps: 2.4, speed: "S3" },
+  "R1-06": { x: 0, y: -.5, speedMps: 2.45, speed: "S3" },
+  "R2-01": { x: 0, y: .35, speedMps: .8, speed: "S1" },
+  "R2-02": { x: 0, y: .35, speedMps: .8, speed: "S1" },
+  "R2-03a": { x: 0, y: -.05, speedMps: .7, speed: "S1" },
+  "R2-03b": { x: 0, y: -.35, speedMps: 1.8, speed: "S3" },
+  "R2-04a": { x: 0, y: .45, speedMps: .75, speed: "S1" },
+  "R2-04b": { x: 0, y: .45, speedMps: .9, speed: "S1～S2" },
+  "R2-05a": { x: 0, y: -.5, speedMps: 2.1, speed: "S3" },
+  "R2-05b": { x: 0, y: -.55, speedMps: 2.45, speed: "S3" },
 };
 
 for (const [id, setting] of Object.entries(verifiedSettings)) {
   const task = tasks.find((candidate) => candidate.id === id);
   task.cue = { ...task.cue, ...setting };
+  task.cue.label = `撞点（${task.cue.x >= 0 ? "+" : ""}${task.cue.x.toFixed(2)}, ${task.cue.y >= 0 ? "+" : ""}${task.cue.y.toFixed(2)}）`;
   task.interactive = true;
   task.validation = {
     ...task.validation,
@@ -397,6 +406,8 @@ for (const [id, setting] of Object.entries(verifiedSettings)) {
 // primary success zone must be the middle band rather than the first S1 band.
 const r002 = tasks.find((task) => task.id === "R0-02");
 if (r002?.zones?.[1]) r002.successZone = r002.zones[1];
+const r204b = tasks.find((task) => task.id === "R2-04b");
+if (r204b) r204b.successMode = "pass";
 
 for (const task of tasks) {
   task.setup = task.setup
@@ -406,6 +417,7 @@ for (const task of tasks) {
 
 chapters.find((chapter) => chapter.id === "r0").status = "公開中";
 chapters.find((chapter) => chapter.id === "r1").status = "公開中";
+chapters.find((chapter) => chapter.id === "r2").status = "公開中";
 
 fs.writeFileSync(output, `${JSON.stringify({ version: "0.2", generatedFrom: path.basename(input), chapters, drills: tasks }, null, 2)}\n`);
 console.log(`Imported ${tasks.length} tasks to ${output}`);
