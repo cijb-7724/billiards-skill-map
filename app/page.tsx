@@ -363,6 +363,10 @@ function evaluateExperiment(drill: Drill, shot: BrowserShot) {
 
 function HomeLanding({ onNavigate }: { onNavigate: (page: PageKey, drillId?: string) => void }) {
   const published = drillData.drills.filter((drill) => drill.interactive).length;
+  const roadmapRows = Array.from(
+    { length: Math.ceil(drillData.chapters.length / 3) },
+    (_, row) => drillData.chapters.slice(row * 3, row * 3 + 3),
+  );
   return (
     <section className="home-page">
       <div className="home-hero">
@@ -377,7 +381,12 @@ function HomeLanding({ onNavigate }: { onNavigate: (page: PageKey, drillId?: str
       </div></section>
 
       <section className="roadmap-section"><div className="section-heading"><span>テーマ一覧</span><h2>基礎から上級循環までのロードマップ</h2><p>緑は3D検証済み、薄色は配置図を公開して物理条件を再検証中です。</p></div><div className="roadmap-flow">
-        {drillData.chapters.map((chapter, index) => <button key={chapter.id} className={chapter.status === "公開中" ? "ready" : "pending"} onClick={() => onNavigate("roadmap", chapter.drills[0])}><small>{String(index + 1).padStart(2, "0")}</small><b>{chapter.number}　{chapter.title}</b><span>{chapter.summary}</span><em>{chapter.status}</em></button>)}
+        {roadmapRows.map((chapters, row) => <div key={chapters[0].id} className={`roadmap-row ${row % 2 ? "reverse" : ""}`}>
+          {chapters.map((chapter) => {
+            const index = drillData.chapters.findIndex((item) => item.id === chapter.id);
+            return <button key={chapter.id} className={chapter.status === "公開中" ? "ready" : "pending"} onClick={() => onNavigate("roadmap", chapter.drills[0])}><small>{String(index + 1).padStart(2, "0")}</small><b>{chapter.number}　{chapter.title}</b><span>{chapter.summary}</span><em>{chapter.status}</em></button>;
+          })}
+        </div>)}
       </div></section>
     </section>
   );
@@ -427,8 +436,16 @@ export default function Home() {
   const activeShot = isDefault || !experimentalShot ? baselineShot : experimentalShot;
   const drill = useMemo(() => ({ ...authored, duration: activeShot.duration, trajectories: activeShot.trajectories }) as unknown as Drill, [activeShot, authored]);
 
+  const selectDrill = (drillId: string) => {
+    setPlaying(false);
+    setTime(0);
+    previous.current = null;
+    if (frame.current) cancelAnimationFrame(frame.current);
+    setSelectedId(drillId);
+  };
+
   const navigate = (page: PageKey, drillId?: string) => {
-    if (drillId) setSelectedId(drillId);
+    if (drillId) selectDrill(drillId);
     setScreen(page);
     window.location.hash = page === "home" ? "" : page;
   };
@@ -539,7 +556,7 @@ export default function Home() {
                   {chapter.drills.map((id) => {
                     const item = drillData.drills.find((candidate) => candidate.id === id);
                     if (!item) return null;
-                    return <button key={id} className={selectedId === id ? "selected" : ""} onClick={() => setSelectedId(id)}><span>{id}</span>{item.title}</button>;
+                    return <button key={id} className={selectedId === id ? "selected" : ""} onClick={() => selectDrill(id)}><span>{id}</span>{item.title}</button>;
                   })}
                 </div>
               </section>

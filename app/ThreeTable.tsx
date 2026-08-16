@@ -215,15 +215,31 @@ function createBall(ball: ThreeDrill["balls"][number]) {
 
 function addTable(scene: THREE.Scene, drill: ThreeDrill) {
   const wood = makeWoodMaterial();
-  const darkWood = new THREE.MeshStandardMaterial({ color: 0x27180f, roughness: .58, metalness: .02 });
-  const cushion = new THREE.MeshStandardMaterial({ color: 0x0d6e54, roughness: .72 });
+  const darkWood = new THREE.MeshPhysicalMaterial({ color: 0x24140c, roughness: .46, clearcoat: .25, clearcoatRoughness: .34 });
+  const cushion = new THREE.MeshStandardMaterial({ color: 0x0b7256, roughness: .76 });
   const cloth = makeClothMaterial();
-  const trim = new THREE.MeshStandardMaterial({ color: 0xb89054, roughness: .32, metalness: .46 });
+  const trim = new THREE.MeshStandardMaterial({ color: 0xc5a066, roughness: .28, metalness: .58 });
+  const leather = new THREE.MeshPhysicalMaterial({ color: 0x100b08, roughness: .92, clearcoat: .06 });
+  const casting = new THREE.MeshStandardMaterial({ color: 0x5a4332, roughness: .34, metalness: .32 });
 
-  const apron = new THREE.Mesh(new THREE.BoxGeometry(TABLE_LENGTH + .25, .095, TABLE_WIDTH + .25), darkWood);
-  apron.position.set(TABLE_LENGTH / 2, -.055, TABLE_WIDTH / 2);
+  const apron = new THREE.Mesh(new THREE.BoxGeometry(TABLE_LENGTH + .34, .15, TABLE_WIDTH + .34), darkWood);
+  apron.position.set(TABLE_LENGTH / 2, -.092, TABLE_WIDTH / 2);
+  apron.castShadow = true;
   apron.receiveShadow = true;
   scene.add(apron);
+
+  const revealWidth = .018;
+  [
+    { size: [TABLE_LENGTH + .29, .018, revealWidth] as [number, number, number], position: [TABLE_LENGTH / 2, -.008, -.136] as [number, number, number] },
+    { size: [TABLE_LENGTH + .29, .018, revealWidth] as [number, number, number], position: [TABLE_LENGTH / 2, -.008, TABLE_WIDTH + .136] as [number, number, number] },
+    { size: [revealWidth, .018, TABLE_WIDTH + .29] as [number, number, number], position: [-.136, -.008, TABLE_WIDTH / 2] as [number, number, number] },
+    { size: [revealWidth, .018, TABLE_WIDTH + .29] as [number, number, number], position: [TABLE_LENGTH + .136, -.008, TABLE_WIDTH / 2] as [number, number, number] },
+  ].forEach((part) => {
+    const reveal = new THREE.Mesh(new THREE.BoxGeometry(...part.size), trim);
+    reveal.position.set(...part.position);
+    reveal.castShadow = true;
+    scene.add(reveal);
+  });
 
   const bed = new THREE.Mesh(new THREE.PlaneGeometry(TABLE_LENGTH, TABLE_WIDTH), cloth);
   bed.rotation.x = -Math.PI / 2;
@@ -254,6 +270,14 @@ function addTable(scene: THREE.Scene, drill: ThreeDrill) {
     mesh.castShadow = true;
     mesh.receiveShadow = true;
     scene.add(mesh);
+
+    const top = new THREE.Mesh(
+      new THREE.BoxGeometry(rail.size[0] * .985, .012, rail.size[2] * .9),
+      new THREE.MeshPhysicalMaterial({ color: 0x8b5835, roughness: .3, clearcoat: .55, clearcoatRoughness: .22 }),
+    );
+    top.position.set(rail.position[0], railHeight + .006, rail.position[2]);
+    top.castShadow = true;
+    scene.add(top);
   });
 
   const trimHeight = .008;
@@ -292,13 +316,13 @@ function addTable(scene: THREE.Scene, drill: ThreeDrill) {
     scene.add(mesh);
   });
 
-  const gridMaterial = new THREE.LineBasicMaterial({ color: 0xd8eee5, transparent: true, opacity: .11 });
+  const gridMaterial = new THREE.LineBasicMaterial({ color: 0xe1f4ec, transparent: true, opacity: .27, depthWrite: false });
   const gridPoints: THREE.Vector3[] = [];
-  for (let x = .5; x < 8; x += .5) {
-    gridPoints.push(new THREE.Vector3(x * DIAMOND_M, .004, 0), new THREE.Vector3(x * DIAMOND_M, .004, TABLE_WIDTH));
+  for (let x = 1; x < 8; x += 1) {
+    gridPoints.push(new THREE.Vector3(x * DIAMOND_M, .006, 0), new THREE.Vector3(x * DIAMOND_M, .006, TABLE_WIDTH));
   }
-  for (let y = .5; y < 4; y += .5) {
-    gridPoints.push(new THREE.Vector3(0, .004, y * DIAMOND_M), new THREE.Vector3(TABLE_LENGTH, .004, y * DIAMOND_M));
+  for (let y = 1; y < 4; y += 1) {
+    gridPoints.push(new THREE.Vector3(0, .006, y * DIAMOND_M), new THREE.Vector3(TABLE_LENGTH, .006, y * DIAMOND_M));
   }
   scene.add(new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(gridPoints), gridMaterial));
 
@@ -322,18 +346,39 @@ function addTable(scene: THREE.Scene, drill: ThreeDrill) {
     });
   }
 
-  const pocketMaterial = new THREE.MeshStandardMaterial({ color: 0x020302, roughness: 1 });
-  const rimMaterial = new THREE.MeshStandardMaterial({ color: 0x16100c, roughness: .75, metalness: .08 });
+  const pocketMaterial = new THREE.MeshStandardMaterial({ color: 0x010201, roughness: 1 });
+  const rimMaterial = new THREE.MeshStandardMaterial({ color: 0x241a13, roughness: .54, metalness: .18 });
   POCKETS.forEach((pocketPosition) => {
     const isSide = pocketPosition.x === TABLE_LENGTH / 2;
     const pocketRadius = isSide ? .067 : .075;
-    const pocket = new THREE.Mesh(new THREE.CylinderGeometry(pocketRadius, pocketRadius * .84, .04, 48), pocketMaterial);
-    pocket.position.set(pocketPosition.x, -.002, pocketPosition.z);
+    const pocket = new THREE.Mesh(new THREE.CylinderGeometry(pocketRadius, pocketRadius * .52, .11, 48, 1, true), leather);
+    pocket.position.set(pocketPosition.x, -.045, pocketPosition.z);
+    pocket.castShadow = true;
     scene.add(pocket);
+    const pocketMouth = new THREE.Mesh(new THREE.CircleGeometry(pocketRadius * .94, 48), pocketMaterial);
+    pocketMouth.rotation.x = -Math.PI / 2;
+    pocketMouth.position.set(pocketPosition.x, .008, pocketPosition.z);
+    scene.add(pocketMouth);
+    const pocketBottom = new THREE.Mesh(new THREE.CircleGeometry(pocketRadius * .53, 48), pocketMaterial);
+    pocketBottom.rotation.x = -Math.PI / 2;
+    pocketBottom.position.set(pocketPosition.x, -.1, pocketPosition.z);
+    scene.add(pocketBottom);
     const rim = new THREE.Mesh(new THREE.TorusGeometry(pocketRadius, .009, 10, 48), rimMaterial);
     rim.rotation.x = Math.PI / 2;
     rim.position.set(pocketPosition.x, .019, pocketPosition.z);
+    rim.castShadow = true;
     scene.add(rim);
+
+    const jawOffsets: Array<[number, number]> = isSide
+      ? [[-.084, 0], [.084, 0]]
+      : [[pocketPosition.x === 0 ? .055 : -.055, 0], [0, pocketPosition.z === 0 ? .055 : -.055]];
+    jawOffsets.forEach(([xOffset, zOffset]) => {
+      const jaw = new THREE.Mesh(new THREE.SphereGeometry(.027, 24, 12), casting);
+      jaw.scale.set(xOffset === 0 ? .72 : 1.35, .32, zOffset === 0 ? .72 : 1.35);
+      jaw.position.set(pocketPosition.x + xOffset, .057, pocketPosition.z + zOffset);
+      jaw.castShadow = true;
+      scene.add(jaw);
+    });
     if (drill.targetPockets.includes(pocketPosition.id)) {
       const target = new THREE.Mesh(
         new THREE.TorusGeometry(.082, .006, 8, 48),
@@ -421,12 +466,12 @@ export function ThreeTable({
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.34;
+    renderer.toneMappingExposure = 1.46;
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFShadowMap;
 
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x263b34);
+    scene.background = new THREE.Color(0x30483f);
     const camera = viewMode === "player"
       ? new THREE.PerspectiveCamera(45, 2, .01, 12)
       : new THREE.OrthographicCamera(-1.5, 1.5, .8, -.8, .01, 12);
