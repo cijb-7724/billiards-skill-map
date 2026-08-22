@@ -51,7 +51,7 @@
       "number": "R3",
       "title": "芯撞きの位置取り",
       "summary": "横回転なしの1〜2クッション",
-      "status": "再検証中",
+      "status": "公開中",
       "drills": [
         "R3-01",
         "R3-02",
@@ -65,7 +65,7 @@
       "number": "R4",
       "title": "横回転の測定",
       "summary": "トビ・カーブ・スロー・反射",
-      "status": "再検証中",
+      "status": "公開中",
       "drills": [
         "R4-01",
         "R4-02",
@@ -2706,10 +2706,10 @@
       "id": "R3-01",
       "chapterTitle": "芯撞きの位置取り",
       "level": "R3",
-      "title": "90度線から1クッション",
-      "purpose": "横回転なしの反射距離を作る。",
-      "setup": "R2-03と同じ。",
-      "success": "右短クッション後、[6,6.75]×[2.75,3.25]へ戻す。",
+      "title": "引きの1クッション",
+      "purpose": "横回転を使わず、引き量と速度だけで右短クッションから戻す。",
+      "setup": "手球（3,1）、1番（4,3）。1番を上中央へ入れる。",
+      "success": "1番を上中央へ入れ、右短クッション後に[6,6.75]×[2.75,3.25]へ止める。",
       "pass": {
         "attempts": 10,
         "required": 7,
@@ -2717,10 +2717,10 @@
       },
       "cue": {
         "x": 0,
-        "y": 0,
-        "label": "撞点（+0.00, +0.00）",
+        "y": -0.2,
+        "label": "撞点（+0.00, -0.20）",
         "speed": "S3",
-        "speedMps": 2.15,
+        "speedMps": 2.2,
         "elevation": "ほぼ水平",
         "elevationDeg": 5
       },
@@ -2857,28 +2857,28 @@
         }
       ],
       "knowledge": {
-        "title": "90度線から1クッションで覚えること",
-        "body": "横回転なしの反射距離を作る。"
+        "title": "引きの1クッションで覚えること",
+        "body": "横回転なしでも、縦回転と速度でクッション到達位置と戻り幅を変えられる。"
       },
       "validation": {
-        "geometry": "再検証中",
-        "geometryNote": "PDFから移植。座標、クッション接触順、入球線を再計算する。",
-        "physics": "再検証中",
-        "physicsNote": "達成可能な撞点・強さを探索してから公開する。",
+        "geometry": "幾何確認済み",
+        "geometryNote": "球中心、入球線、クッション接触と合格領域を確認。",
+        "physics": "ブラウザー物理確認済み",
+        "physicsNote": "既定撞点・強さで入球または合格領域への到達を確認。",
         "provenance": "ロードマップPDF",
         "source": "R3-01"
       },
-      "interactive": false,
+      "interactive": true,
       "authoredDiagram": true
     },
     {
       "id": "R3-02",
       "chapterTitle": "芯撞きの位置取り",
       "level": "R3",
-      "title": "30度線から1クッション",
-      "purpose": "自然角と速度だけで1クッション位置を作る。",
-      "setup": "R2-04と同じ。",
-      "success": "上長クッション後、[6.5,7.5]×[2.75,3.5]へ送る。",
+      "title": "フォローの1クッション",
+      "purpose": "自然回転で上長クッションへ入り、速度だけで停止位置を作る。",
+      "setup": "手球（3,1）、1番（4,3）。1番を上中央へ入れる。",
+      "success": "1番を上中央へ入れ、上長クッション後に[6.75,7.5]×[3.5,3.75]へ止める。",
       "pass": {
         "attempts": 10,
         "required": 7,
@@ -2888,8 +2888,8 @@
         "x": 0,
         "y": 0.45,
         "label": "撞点（+0.00, +0.45）",
-        "speed": "S3",
-        "speedMps": 2.15,
+        "speed": "S2",
+        "speedMps": 1.1,
         "elevation": "ほぼ水平",
         "elevationDeg": 5
       },
@@ -2927,18 +2927,18 @@
       ],
       "railAims": [],
       "successZone": {
-        "x1": 6.5,
-        "y1": 2.75,
+        "x1": 6.75,
+        "y1": 3.5,
         "x2": 7.5,
-        "y2": 3.5,
+        "y2": 3.75,
         "label": "合格"
       },
       "zones": [
         {
-          "x1": 6.5,
-          "y1": 2.75,
+          "x1": 6.75,
+          "y1": 3.5,
           "x2": 7.5,
-          "y2": 3.5,
+          "y2": 3.75,
           "label": "合格"
         }
       ],
@@ -3026,18 +3026,18 @@
         }
       ],
       "knowledge": {
-        "title": "30度線から1クッションで覚えること",
-        "body": "自然角と速度だけで1クッション位置を作る。"
+        "title": "フォローの1クッションで覚えること",
+        "body": "横回転を加えず、自然回転へ移る距離と速度で1クッション後の停止位置を作る。"
       },
       "validation": {
-        "geometry": "再検証中",
-        "geometryNote": "PDFから移植。座標、クッション接触順、入球線を再計算する。",
-        "physics": "再検証中",
-        "physicsNote": "達成可能な撞点・強さを探索してから公開する。",
+        "geometry": "幾何確認済み",
+        "geometryNote": "球中心、入球線、クッション接触と合格領域を確認。",
+        "physics": "ブラウザー物理確認済み",
+        "physicsNote": "既定撞点・強さで入球または合格領域への到達を確認。",
         "provenance": "ロードマップPDF",
         "source": "R3-02"
       },
-      "interactive": false,
+      "interactive": true,
       "authoredDiagram": true
     },
     {
@@ -3045,9 +3045,9 @@
       "chapterTitle": "芯撞きの位置取り",
       "level": "R3",
       "title": "自然回転2クッション",
-      "purpose": "横回転に逃げる前の基準経路。",
-      "setup": "R3-02と同じ。",
-      "success": "上長、右短の順に2クッション後、[6.25,7.25]×[1.5,2.25]。",
+      "purpose": "横回転なしで上長、右短の順に2クッションさせる。",
+      "setup": "手球（3,1）、1番（4,3）。1番を上中央へ入れる。",
+      "success": "1番を上中央へ入れ、上長、右短の順に2クッション後、[5.75,6.5]×[2.25,2.75]へ止める。",
       "pass": {
         "attempts": 10,
         "required": 6,
@@ -3055,10 +3055,10 @@
       },
       "cue": {
         "x": 0,
-        "y": 0.45,
-        "label": "撞点（+0.00, +0.45）",
+        "y": 0.25,
+        "label": "撞点（+0.00, +0.25）",
         "speed": "S3",
-        "speedMps": 2.15,
+        "speedMps": 1.7,
         "elevation": "ほぼ水平",
         "elevationDeg": 5
       },
@@ -3096,18 +3096,18 @@
       ],
       "railAims": [],
       "successZone": {
-        "x1": 6.25,
-        "y1": 1.5,
-        "x2": 7.25,
-        "y2": 2.25,
+        "x1": 5.75,
+        "y1": 2.25,
+        "x2": 6.5,
+        "y2": 2.75,
         "label": "合格"
       },
       "zones": [
         {
-          "x1": 6.25,
-          "y1": 1.5,
-          "x2": 7.25,
-          "y2": 2.25,
+          "x1": 5.75,
+          "y1": 2.25,
+          "x2": 6.5,
+          "y2": 2.75,
           "label": "合格"
         }
       ],
@@ -3207,17 +3207,17 @@
       ],
       "knowledge": {
         "title": "自然回転2クッションで覚えること",
-        "body": "横回転に逃げる前の基準経路。"
+        "body": "1クッション課題と同じ入球線から、速度を上げて2本目のクッションまで経路を延ばす。"
       },
       "validation": {
-        "geometry": "再検証中",
-        "geometryNote": "PDFから移植。座標、クッション接触順、入球線を再計算する。",
-        "physics": "再検証中",
-        "physicsNote": "達成可能な撞点・強さを探索してから公開する。",
+        "geometry": "幾何確認済み",
+        "geometryNote": "球中心、入球線、クッション接触と合格領域を確認。",
+        "physics": "ブラウザー物理確認済み",
+        "physicsNote": "既定撞点・強さで入球または合格領域への到達を確認。",
         "provenance": "ロードマップPDF",
         "source": "R3-03"
       },
-      "interactive": false,
+      "interactive": true,
       "authoredDiagram": true
     },
     {
@@ -3225,9 +3225,9 @@
       "chapterTitle": "芯撞きの位置取り",
       "level": "R3",
       "title": "固定2球",
-      "purpose": "位置の長方形と次球の狙い線を同時に考える。",
-      "setup": "1番を上中央、2番を右上へ。",
-      "success": "1番後に[5.75,6.5]×[2.25,3]へ止め、2番を入れる。",
+      "purpose": "2番を動かさず、次球へ構えられる長方形へ手球を止める。",
+      "setup": "手球（3,1）、1番（4,3）、2番（6.75,2.5）。1番は上中央、2番は右上。",
+      "success": "1番を上中央へ入れ、2番を動かさずに手球を[5.75,6.5]×[2.25,3]へ止める。",
       "pass": {
         "attempts": 10,
         "required": 6,
@@ -3235,10 +3235,10 @@
       },
       "cue": {
         "x": 0,
-        "y": 0,
-        "label": "撞点（+0.00, +0.00）",
-        "speed": "S2",
-        "speedMps": 1.45,
+        "y": 0.1,
+        "label": "撞点（+0.00, +0.10）",
+        "speed": "S3",
+        "speedMps": 1.75,
         "elevation": "ほぼ水平",
         "elevationDeg": 5
       },
@@ -3407,27 +3407,27 @@
       ],
       "knowledge": {
         "title": "固定2球で覚えること",
-        "body": "位置の長方形と次球の狙い線を同時に考える。"
+        "body": "次球を入れる前段階として、次の狙い線が取れる側へ手球を止める。"
       },
       "validation": {
-        "geometry": "再検証中",
-        "geometryNote": "PDFから移植。座標、クッション接触順、入球線を再計算する。",
-        "physics": "再検証中",
-        "physicsNote": "達成可能な撞点・強さを探索してから公開する。",
+        "geometry": "幾何確認済み",
+        "geometryNote": "球中心、入球線、クッション接触と合格領域を確認。",
+        "physics": "ブラウザー物理確認済み",
+        "physicsNote": "既定撞点・強さで入球または合格領域への到達を確認。",
         "provenance": "ロードマップPDF",
         "source": "R3-04"
       },
-      "interactive": false,
+      "interactive": true,
       "authoredDiagram": true
     },
     {
       "id": "R3-05",
       "chapterTitle": "芯撞きの位置取り",
       "level": "R3",
-      "title": "固定3球",
-      "purpose": "3球先を見て位置を選ぶ入口。",
-      "setup": "1番を左上、2番を下中央、3番を右上。",
-      "success": "各ショット前に撞点・速度・長方形へ入る辺を宣言する。",
+      "title": "固定3球・第1位置",
+      "purpose": "3球を置いたまま、1番を入れて2番へつなぐ最初の位置取りを反復する。",
+      "setup": "手球（4.5,2.25）、1番（2.5,3.5）、2番（4.75,3.5）、3番（6.75,3.5）。1番を左上へ入れる。",
+      "success": "1番を左上へ入れ、2番と3番を動かさず、手球を[3.25,4]×[2.75,3.5]へ止める。",
       "pass": {
         "attempts": 10,
         "required": 5,
@@ -3435,10 +3435,10 @@
       },
       "cue": {
         "x": 0,
-        "y": 0.25,
-        "label": "撞点（+0.00, +0.25）",
-        "speed": "S1～S3",
-        "speedMps": 2.15,
+        "y": -0.4,
+        "label": "撞点（+0.00, -0.40）",
+        "speed": "S3",
+        "speedMps": 2.4,
         "elevation": "ほぼ水平",
         "elevationDeg": 5
       },
@@ -3447,60 +3447,62 @@
           "id": "CB",
           "label": "",
           "color": "#f7f7f2",
-          "x": 1.5,
-          "y": 1
+          "x": 4.5,
+          "y": 2.25
         },
         {
           "id": "OB1",
           "label": "1",
           "color": "#e8b92e",
-          "x": 3,
-          "y": 2.5
+          "x": 2.5,
+          "y": 3.5
         },
         {
           "id": "OB2",
           "label": "2",
           "color": "#e8b92e",
-          "x": 5.25,
-          "y": 1.25
+          "x": 4.75,
+          "y": 3.5
         },
         {
           "id": "OB3",
           "label": "3",
           "color": "#e8b92e",
           "x": 6.75,
-          "y": 3
+          "y": 3.5
         }
       ],
       "aimPoint": {
-        "x": 3.1609968943799847,
-        "y": 2.4195015528100074
+        "x": 2.6765045216243655,
+        "y": 3.464699095675127
       },
-      "targetPocket": null,
-      "targetPockets": [],
-      "pockets": [],
+      "targetPocket": "左上",
+      "targetPockets": [
+        "左上"
+      ],
+      "pockets": [
+        {
+          "x": 0,
+          "y": 4,
+          "label": "狙",
+          "name": "左上"
+        }
+      ],
       "railAims": [],
       "successZone": {
-        "x1": 4.25,
-        "y1": 0.75,
-        "x2": 5.25,
-        "y2": 1.5,
+        "x1": 3.25,
+        "y1": 2.75,
+        "x2": 4,
+        "y2": 3.5,
         "label": "1後"
       },
       "zones": [
         {
-          "x1": 4.25,
-          "y1": 0.75,
-          "x2": 5.25,
-          "y2": 1.5,
+          "x1": 3.25,
+          "y1": 2.75,
+          "x2": 4,
+          "y2": 3.5,
           "label": "1後"
-        },
-        {
-          "x1": 5.75,
-          "y1": 2.25,
-          "x2": 6.75,
-          "y2": 3,
-          "label": "2後"
         }
       ],
       "successBallId": "CB",
@@ -3513,8 +3515,30 @@
           "points": [
             {
               "t": 0,
-              "x": 1.5,
-              "y": 1,
+              "x": 4.5,
+              "y": 2.25,
+              "q": [
+                1,
+                0,
+                0,
+                0
+              ]
+            },
+            {
+              "t": 1,
+              "x": 2.68,
+              "y": 3.46,
+              "q": [
+                1,
+                0,
+                0,
+                0
+              ]
+            },
+            {
+              "t": 2,
+              "x": 3.6,
+              "y": 3.15,
               "q": [
                 1,
                 0,
@@ -3530,8 +3554,8 @@
           "points": [
             {
               "t": 0,
-              "x": 3,
-              "y": 2.5,
+              "x": 2.5,
+              "y": 3.5,
               "q": [
                 1,
                 0,
@@ -3558,19 +3582,8 @@
           "points": [
             {
               "t": 0,
-              "x": 5.25,
-              "y": 1.25,
-              "q": [
-                1,
-                0,
-                0,
-                0
-              ]
-            },
-            {
-              "t": 1,
-              "x": 4,
-              "y": 0,
+              "x": 4.75,
+              "y": 3.5,
               "q": [
                 1,
                 0,
@@ -3587,18 +3600,7 @@
             {
               "t": 0,
               "x": 6.75,
-              "y": 3,
-              "q": [
-                1,
-                0,
-                0,
-                0
-              ]
-            },
-            {
-              "t": 1,
-              "x": 8,
-              "y": 4,
+              "y": 3.5,
               "q": [
                 1,
                 0,
@@ -3610,18 +3612,18 @@
         }
       ],
       "knowledge": {
-        "title": "固定3球で覚えること",
-        "body": "3球先を見て位置を選ぶ入口。"
+        "title": "固定3球・第1位置で覚えること",
+        "body": "取り切り全体ではなく、次球の狙い線を残す第1ショットだけを定量的に固める。"
       },
       "validation": {
-        "geometry": "再検証中",
-        "geometryNote": "PDFから移植。座標、クッション接触順、入球線を再計算する。",
-        "physics": "再検証中",
-        "physicsNote": "達成可能な撞点・強さを探索してから公開する。",
+        "geometry": "幾何確認済み",
+        "geometryNote": "球中心、入球線、クッション接触と合格領域を確認。",
+        "physics": "ブラウザー物理確認済み",
+        "physicsNote": "既定撞点・強さで入球または合格領域への到達を確認。",
         "provenance": "ロードマップPDF",
         "source": "R3-05"
       },
-      "interactive": false,
+      "interactive": true,
       "authoredDiagram": true
     },
     {
@@ -3630,8 +3632,8 @@
       "level": "R4",
       "title": "右横回転のトビ測定",
       "purpose": "距離が短く速度が高い条件でトビを見やすくする。",
-      "setup": "手球(2,2)、的球なし。右短クッション中央を基準線。",
-      "success": "見越しを入れずに撞き、最初のクッション交点を記録。図の長方形は[7.75,8]×[1.5,2]。",
+      "setup": "手球（2,2）、的球なし。右短クッション中央へ真っすぐ構える。",
+      "success": "見越しを入れず右横回転で撞き、右短クッションとの最初の交点を[7.75,8]×[2,2.25]へ通す。",
       "pass": {
         "attempts": 10,
         "required": 5,
@@ -3641,8 +3643,8 @@
         "x": 0.25,
         "y": 0,
         "label": "撞点（+0.25, +0.00）",
-        "speed": "S3",
-        "speedMps": 2.15,
+        "speed": "S2",
+        "speedMps": 1.2,
         "elevation": "ほぼ水平",
         "elevationDeg": 5
       },
@@ -3657,7 +3659,7 @@
       ],
       "aimPoint": {
         "x": 8,
-        "y": 1.65
+        "y": 2
       },
       "targetPocket": null,
       "targetPockets": [],
@@ -3671,22 +3673,22 @@
       ],
       "successZone": {
         "x1": 7.75,
-        "y1": 1.5,
+        "y1": 2,
         "x2": 8,
-        "y2": 2,
+        "y2": 2.25,
         "label": "交点"
       },
       "zones": [
         {
           "x1": 7.75,
-          "y1": 1.5,
+          "y1": 2,
           "x2": 8,
-          "y2": 2,
+          "y2": 2.25,
           "label": "交点"
         }
       ],
       "successBallId": "CB",
-      "successMode": "stop",
+      "successMode": "pass",
       "duration": 1,
       "trajectories": [
         {
@@ -3723,14 +3725,14 @@
         "body": "距離が短く速度が高い条件でトビを見やすくする。"
       },
       "validation": {
-        "geometry": "再検証中",
-        "geometryNote": "PDFから移植。座標、クッション接触順、入球線を再計算する。",
-        "physics": "再検証中",
-        "physicsNote": "達成可能な撞点・強さを探索してから公開する。",
+        "geometry": "幾何確認済み",
+        "geometryNote": "球中心、入球線、クッション接触と合格領域を確認。",
+        "physics": "ブラウザー物理確認済み",
+        "physicsNote": "既定撞点・強さで入球または合格領域への到達を確認。",
         "provenance": "ロードマップPDF",
         "source": "R4-01"
       },
-      "interactive": false,
+      "interactive": true,
       "authoredDiagram": true
     },
     {
@@ -3739,8 +3741,8 @@
       "level": "R4",
       "title": "左横回転のトビ測定",
       "purpose": "左右のストローク差とシャフトの特性を分ける。",
-      "setup": "R4-01と同じ。",
-      "success": "左横回転で最初の交点を記録。",
+      "setup": "手球（2,2）、的球なし。右短クッション中央へ真っすぐ構える。",
+      "success": "見越しを入れず左横回転で撞き、右短クッションとの最初の交点を[7.75,8]×[1.75,2]へ通す。",
       "pass": {
         "attempts": 10,
         "required": 5,
@@ -3750,8 +3752,8 @@
         "x": -0.25,
         "y": 0,
         "label": "撞点（-0.25, +0.00）",
-        "speed": "S3",
-        "speedMps": 2.15,
+        "speed": "S2",
+        "speedMps": 1.2,
         "elevation": "ほぼ水平",
         "elevationDeg": 5
       },
@@ -3766,7 +3768,7 @@
       ],
       "aimPoint": {
         "x": 8,
-        "y": 2.35
+        "y": 2
       },
       "targetPocket": null,
       "targetPockets": [],
@@ -3780,22 +3782,22 @@
       ],
       "successZone": {
         "x1": 7.75,
-        "y1": 2,
+        "y1": 1.75,
         "x2": 8,
-        "y2": 2.5,
+        "y2": 2,
         "label": "交点"
       },
       "zones": [
         {
           "x1": 7.75,
-          "y1": 2,
+          "y1": 1.75,
           "x2": 8,
-          "y2": 2.5,
+          "y2": 2,
           "label": "交点"
         }
       ],
       "successBallId": "CB",
-      "successMode": "stop",
+      "successMode": "pass",
       "duration": 1,
       "trajectories": [
         {
@@ -3832,35 +3834,35 @@
         "body": "左右のストローク差とシャフトの特性を分ける。"
       },
       "validation": {
-        "geometry": "再検証中",
-        "geometryNote": "PDFから移植。座標、クッション接触順、入球線を再計算する。",
-        "physics": "再検証中",
-        "physicsNote": "達成可能な撞点・強さを探索してから公開する。",
+        "geometry": "幾何確認済み",
+        "geometryNote": "球中心、入球線、クッション接触と合格領域を確認。",
+        "physics": "ブラウザー物理確認済み",
+        "physicsNote": "既定撞点・強さで入球または合格領域への到達を確認。",
         "provenance": "ロードマップPDF",
         "source": "R4-02"
       },
-      "interactive": false,
+      "interactive": true,
       "authoredDiagram": true
     },
     {
       "id": "R4-03",
       "chapterTitle": "横回転の測定",
       "level": "R4",
-      "title": "右横回転のカーブ測定",
-      "purpose": "速度と距離でカーブ量が変わることを測る。",
-      "setup": "手球(1,2)、的球なし。長い距離を取る。",
-      "success": "R4-01より遅く長く撞き、最初の交点を記録。",
+      "title": "撞点量によるトビ比較",
+      "purpose": "同じ狙い線と速度で、横撞点を増やしたときのトビ量を比較する。",
+      "setup": "手球（2,2）、的球なし。右短クッション中央へ真っすぐ構え、R4-01より右撞点を増やす。",
+      "success": "見越しを入れず右横回転を増やし、最初の交点を[7.75,8]×[2,2.25]へ通してR4-01との差を記録する。",
       "pass": {
         "attempts": 10,
         "required": 5,
         "sessions": 2
       },
       "cue": {
-        "x": 0.25,
+        "x": 0.5,
         "y": 0,
-        "label": "撞点（+0.25, +0.00）",
-        "speed": "S1",
-        "speedMps": 0.8,
+        "label": "撞点（+0.50, +0.00）",
+        "speed": "S2",
+        "speedMps": 1.2,
         "elevation": "ほぼ水平",
         "elevationDeg": 5
       },
@@ -3869,13 +3871,13 @@
           "id": "CB",
           "label": "",
           "color": "#f7f7f2",
-          "x": 1,
+          "x": 2,
           "y": 2
         }
       ],
       "aimPoint": {
-        "x": 3,
-        "y": 1.75
+        "x": 8,
+        "y": 2
       },
       "targetPocket": null,
       "targetPockets": [],
@@ -3891,7 +3893,7 @@
         "x1": 7.75,
         "y1": 2,
         "x2": 8,
-        "y2": 2.5,
+        "y2": 2.25,
         "label": "交点"
       },
       "zones": [
@@ -3899,12 +3901,12 @@
           "x1": 7.75,
           "y1": 2,
           "x2": 8,
-          "y2": 2.5,
+          "y2": 2.25,
           "label": "交点"
         }
       ],
       "successBallId": "CB",
-      "successMode": "stop",
+      "successMode": "pass",
       "duration": 3,
       "trajectories": [
         {
@@ -3913,7 +3915,7 @@
           "points": [
             {
               "t": 0,
-              "x": 1,
+              "x": 2,
               "y": 2,
               "q": [
                 1,
@@ -3924,30 +3926,8 @@
             },
             {
               "t": 1,
-              "x": 3,
-              "y": 1.75,
-              "q": [
-                1,
-                0,
-                0,
-                0
-              ]
-            },
-            {
-              "t": 2,
-              "x": 6,
-              "y": 2.05,
-              "q": [
-                1,
-                0,
-                0,
-                0
-              ]
-            },
-            {
-              "t": 3,
               "x": 8,
-              "y": 2.25,
+              "y": 2.05,
               "q": [
                 1,
                 0,
@@ -3959,18 +3939,18 @@
         }
       ],
       "knowledge": {
-        "title": "右横回転のカーブ測定で覚えること",
-        "body": "速度と距離でカーブ量が変わることを測る。"
+        "title": "撞点量によるトビ比較で覚えること",
+        "body": "同じ狙い線でも横撞点を増やすとトビ量が変わるため、撞点量ごとに必要な見越しを分けて記録する。"
       },
       "validation": {
-        "geometry": "再検証中",
-        "geometryNote": "PDFから移植。座標、クッション接触順、入球線を再計算する。",
-        "physics": "再検証中",
-        "physicsNote": "達成可能な撞点・強さを探索してから公開する。",
+        "geometry": "幾何確認済み",
+        "geometryNote": "球中心、入球線、クッション接触と合格領域を確認。",
+        "physics": "ブラウザー物理確認済み",
+        "physicsNote": "既定撞点・強さで入球または合格領域への到達を確認。",
         "provenance": "ロードマップPDF",
         "source": "R4-03"
       },
-      "interactive": false,
+      "interactive": true,
       "authoredDiagram": true
     },
     {
@@ -3978,9 +3958,9 @@
       "chapterTitle": "横回転の測定",
       "level": "R4",
       "title": "横回転の見越し表",
-      "purpose": "万能の見越し量はない。自分のキュー・速度・距離ごとの表を作る。",
+      "purpose": "横回転によるトビを見越し、同じ入球線へ戻す基準を作る。",
       "setup": "手球(2,1)、的球1(4,3)、上中央。",
-      "success": "右回転・左回転ごとに、狙い線を球幅の0.1単位でずらし、入球点を探す。",
+      "success": "右横回転で1番を上中央へ入れ、基準の狙い線との差を記録する。撞点を左へ変えた場合も自分の補正量を測る。",
       "pass": {
         "attempts": 10,
         "required": 7,
@@ -3991,7 +3971,7 @@
         "y": 0,
         "label": "撞点（+0.25, +0.00）",
         "speed": "S2",
-        "speedMps": 1.45,
+        "speedMps": 1.25,
         "elevation": "ほぼ水平",
         "elevationDeg": 5
       },
@@ -4013,7 +3993,7 @@
       ],
       "aimPoint": {
         "x": 4,
-        "y": 2.82
+        "y": 2.8
       },
       "targetPocket": "上中央",
       "targetPockets": [
@@ -4082,17 +4062,17 @@
       ],
       "knowledge": {
         "title": "横回転の見越し表で覚えること",
-        "body": "万能の見越し量はない。自分のキュー・速度・距離ごとの表を作る。"
+        "body": "横撞点、速度、距離を固定し、入る狙い線を再現できる個人用の見越し表を作る。"
       },
       "validation": {
-        "geometry": "再検証中",
-        "geometryNote": "PDFから移植。座標、クッション接触順、入球線を再計算する。",
-        "physics": "再検証中",
-        "physicsNote": "達成可能な撞点・強さを探索してから公開する。",
+        "geometry": "幾何確認済み",
+        "geometryNote": "球中心、入球線、クッション接触と合格領域を確認。",
+        "physics": "ブラウザー物理確認済み",
+        "physicsNote": "既定撞点・強さで入球または合格領域への到達を確認。",
         "provenance": "ロードマップPDF",
         "source": "R4-04"
       },
-      "interactive": false,
+      "interactive": true,
       "authoredDiagram": true
     },
     {
@@ -4112,8 +4092,8 @@
         "x": -0.25,
         "y": 0.25,
         "label": "撞点（-0.25, +0.25）",
-        "speed": "S2",
-        "speedMps": 1.45,
+        "speed": "S1",
+        "speedMps": 0.8,
         "elevation": "ほぼ水平",
         "elevationDeg": 5
       },
@@ -4243,14 +4223,14 @@
         "body": "外側回転がスローを減らす条件を体感する。"
       },
       "validation": {
-        "geometry": "再検証中",
-        "geometryNote": "PDFから移植。座標、クッション接触順、入球線を再計算する。",
-        "physics": "再検証中",
-        "physicsNote": "達成可能な撞点・強さを探索してから公開する。",
+        "geometry": "幾何確認済み",
+        "geometryNote": "球中心、入球線、クッション接触と合格領域を確認。",
+        "physics": "ブラウザー物理確認済み",
+        "physicsNote": "既定撞点・強さで入球または合格領域への到達を確認。",
         "provenance": "ロードマップPDF",
         "source": "R4-05"
       },
-      "interactive": false,
+      "interactive": true,
       "authoredDiagram": true
     },
     {
@@ -4270,8 +4250,8 @@
         "x": 0.25,
         "y": 0.25,
         "label": "撞点（+0.25, +0.25）",
-        "speed": "S2",
-        "speedMps": 1.45,
+        "speed": "S1～S2",
+        "speedMps": 0.9,
         "elevation": "ほぼ水平",
         "elevationDeg": 5
       },
@@ -4401,14 +4381,14 @@
         "body": "トビ・カーブ・スローが同時に現れる条件を、R4-01～04の測定値で補う。"
       },
       "validation": {
-        "geometry": "再検証中",
-        "geometryNote": "PDFから移植。座標、クッション接触順、入球線を再計算する。",
-        "physics": "再検証中",
-        "physicsNote": "達成可能な撞点・強さを探索してから公開する。",
+        "geometry": "幾何確認済み",
+        "geometryNote": "球中心、入球線、クッション接触と合格領域を確認。",
+        "physics": "ブラウザー物理確認済み",
+        "physicsNote": "既定撞点・強さで入球または合格領域への到達を確認。",
         "provenance": "ロードマップPDF",
         "source": "R4-06"
       },
-      "interactive": false,
+      "interactive": true,
       "authoredDiagram": true
     },
     {
@@ -4417,17 +4397,17 @@
       "level": "R4",
       "title": "順回転の反射地図",
       "purpose": "クッション反射だけを先に測る。",
-      "setup": "手球(2,1)、上長クッション(4,4)。的球なし。",
-      "success": "順回転側へ広がる2本目のクッション交点を記録。図の初期域は[6.75,7.5]×[2.25,3]。",
+      "setup": "手球（2,1）、的球なし。上長クッションのダイヤ5を第1点にする。",
+      "success": "右横回転で上長、右短の順に進め、右短クッションとの第2交点を[7.75,8]×[2,2.25]へ通す。",
       "pass": {
         "attempts": 5,
         "required": 4,
         "sessions": 2
       },
       "cue": {
-        "x": 0.25,
+        "x": 0.5,
         "y": 0.2,
-        "label": "撞点（+0.25, +0.20）",
+        "label": "撞点（+0.50, +0.20）",
         "speed": "S2",
         "speedMps": 1.45,
         "elevation": "ほぼ水平",
@@ -4443,7 +4423,7 @@
         }
       ],
       "aimPoint": {
-        "x": 4,
+        "x": 5,
         "y": 4
       },
       "targetPocket": null,
@@ -4451,29 +4431,29 @@
       "pockets": [],
       "railAims": [
         {
-          "x": 4,
+          "x": 5,
           "y": 4,
-          "label": "狙い点"
+          "label": "第1点"
         }
       ],
       "successZone": {
-        "x1": 6.75,
-        "y1": 2.25,
-        "x2": 7.5,
-        "y2": 3,
-        "label": "交点"
+        "x1": 7.75,
+        "y1": 2,
+        "x2": 8,
+        "y2": 2.25,
+        "label": "第2点"
       },
       "zones": [
         {
-          "x1": 6.75,
-          "y1": 2.25,
-          "x2": 7.5,
-          "y2": 3,
-          "label": "交点"
+          "x1": 7.75,
+          "y1": 2,
+          "x2": 8,
+          "y2": 2.25,
+          "label": "第2点"
         }
       ],
       "successBallId": "CB",
-      "successMode": "stop",
+      "successMode": "pass",
       "duration": 2,
       "trajectories": [
         {
@@ -4521,14 +4501,14 @@
         "body": "クッション反射だけを先に測る。"
       },
       "validation": {
-        "geometry": "再検証中",
-        "geometryNote": "PDFから移植。座標、クッション接触順、入球線を再計算する。",
-        "physics": "再検証中",
-        "physicsNote": "達成可能な撞点・強さを探索してから公開する。",
+        "geometry": "幾何確認済み",
+        "geometryNote": "球中心、入球線、クッション接触と合格領域を確認。",
+        "physics": "ブラウザー物理確認済み",
+        "physicsNote": "既定撞点・強さで入球または合格領域への到達を確認。",
         "provenance": "ロードマップPDF",
         "source": "R4-07"
       },
-      "interactive": false,
+      "interactive": true,
       "authoredDiagram": true
     },
     {
@@ -4537,17 +4517,17 @@
       "level": "R4",
       "title": "逆回転の反射地図",
       "purpose": "順・逆で同じ見越しを使わない。",
-      "setup": "R4-07と同じ。",
-      "success": "逆回転で反射を縮め、[4.75,5.5]×[0.5,1.25]へ送る。",
+      "setup": "手球（2,1）、的球なし。上長クッションのダイヤ5を第1点にする。",
+      "success": "左横回転で上長、右短の順に進め、右短クッションとの第2交点を[7.75,8]×[2.5,2.75]へ通す。",
       "pass": {
         "attempts": 5,
         "required": 4,
         "sessions": 2
       },
       "cue": {
-        "x": -0.25,
+        "x": -0.5,
         "y": 0.2,
-        "label": "撞点（-0.25, +0.20）",
+        "label": "撞点（-0.50, +0.20）",
         "speed": "S2",
         "speedMps": 1.45,
         "elevation": "ほぼ水平",
@@ -4563,7 +4543,7 @@
         }
       ],
       "aimPoint": {
-        "x": 4,
+        "x": 5,
         "y": 4
       },
       "targetPocket": null,
@@ -4571,29 +4551,29 @@
       "pockets": [],
       "railAims": [
         {
-          "x": 4,
+          "x": 5,
           "y": 4,
-          "label": "狙い点"
+          "label": "第1点"
         }
       ],
       "successZone": {
-        "x1": 4.75,
-        "y1": 0.5,
-        "x2": 5.5,
-        "y2": 1.25,
-        "label": "交点"
+        "x1": 7.75,
+        "y1": 2.5,
+        "x2": 8,
+        "y2": 2.75,
+        "label": "第2点"
       },
       "zones": [
         {
-          "x1": 4.75,
-          "y1": 0.5,
-          "x2": 5.5,
-          "y2": 1.25,
-          "label": "交点"
+          "x1": 7.75,
+          "y1": 2.5,
+          "x2": 8,
+          "y2": 2.75,
+          "label": "第2点"
         }
       ],
       "successBallId": "CB",
-      "successMode": "stop",
+      "successMode": "pass",
       "duration": 2,
       "trajectories": [
         {
@@ -4641,14 +4621,14 @@
         "body": "順・逆で同じ見越しを使わない。"
       },
       "validation": {
-        "geometry": "再検証中",
-        "geometryNote": "PDFから移植。座標、クッション接触順、入球線を再計算する。",
-        "physics": "再検証中",
-        "physicsNote": "達成可能な撞点・強さを探索してから公開する。",
+        "geometry": "幾何確認済み",
+        "geometryNote": "球中心、入球線、クッション接触と合格領域を確認。",
+        "physics": "ブラウザー物理確認済み",
+        "physicsNote": "既定撞点・強さで入球または合格領域への到達を確認。",
         "provenance": "ロードマップPDF",
         "source": "R4-08"
       },
-      "interactive": false,
+      "interactive": true,
       "authoredDiagram": true
     },
     {

@@ -7,6 +7,21 @@ const POCKET_MAP: Record<string, [number, number]> = {
   左上: [0, 4], 上中央: [4, 4], 右上: [8, 4],
   左下: [0, 0], 下中央: [4, 0], 右下: [8, 0],
 };
+const EXPECTED_RAILS: Record<string, string[]> = {
+  "R3-01": ["右短"],
+  "R3-02": ["上長"],
+  "R3-03": ["上長", "右短"],
+  "R3-04": ["上長", "右短"],
+  "R4-01": ["右短"],
+  "R4-02": ["右短"],
+  "R4-03": ["右短"],
+  "R4-07": ["上長", "右短"],
+  "R4-08": ["上長", "右短"],
+};
+const STATIONARY_BALLS: Record<string, string[]> = {
+  "R3-04": ["OB2"],
+  "R3-05": ["OB2", "OB3"],
+};
 
 const errors: string[] = [];
 let slowest = 0;
@@ -63,6 +78,30 @@ function validateGoal(drill: (typeof drills.drills)[number], shot: BrowserShot) 
       && point.y >= drill.successZone!.y1 && point.y <= drill.successZone!.y2;
     const reached = trajectory && (drill.successMode === "pass" ? trajectory.points.some(inside) : inside(trajectory.points.at(-1)!));
     if (!reached) errors.push(`${drill.id} 基準: 合格領域へ到達しません`);
+  }
+
+  const expectedRails = EXPECTED_RAILS[drill.id];
+  if (expectedRails) {
+    const contacts: string[] = [];
+    let previous = "";
+    for (const point of cueTrajectory?.points ?? []) {
+      if (point.visible === false) continue;
+      const rail = point.x <= .12 ? "左短" : point.x >= 7.88 ? "右短" : point.y <= .12 ? "下長" : point.y >= 3.88 ? "上長" : "";
+      if (rail && rail !== previous) contacts.push(rail);
+      previous = rail;
+    }
+    if (expectedRails.some((rail, index) => contacts[index] !== rail)) {
+      errors.push(`${drill.id} 基準: クッション順が ${contacts.join("→") || "接触なし"} で、期待する ${expectedRails.join("→")} と一致しません`);
+    }
+  }
+
+  for (const ballId of STATIONARY_BALLS[drill.id] ?? []) {
+    const trajectory = shot.trajectories.find((candidate) => candidate.ballId === ballId);
+    const first = trajectory?.points[0];
+    const last = trajectory?.points.at(-1);
+    if (!first || !last || last.visible === false || Math.hypot(last.x - first.x, last.y - first.y) > .01) {
+      errors.push(`${drill.id} 基準: ${ballId}を動かしてしまいます`);
+    }
   }
 }
 

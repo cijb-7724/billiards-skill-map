@@ -238,6 +238,130 @@ function revise(id, changes) {
   task.validation.geometry = "再設計済み・物理確認待ち";
 }
 
+revise("R3-01", {
+  title: "引きの1クッション",
+  purpose: "横回転を使わず、引き量と速度だけで右短クッションから戻す。",
+  setup: "手球（3,1）、1番（4,3）。1番を上中央へ入れる。",
+  success: "1番を上中央へ入れ、右短クッション後に[6,6.75]×[2.75,3.25]へ止める。",
+  successZone: { x1: 6, y1: 2.75, x2: 6.75, y2: 3.25, label: "合格" },
+  zones: [{ x1: 6, y1: 2.75, x2: 6.75, y2: 3.25, label: "合格" }],
+  knowledge: { title: "引きの1クッションで覚えること", body: "横回転なしでも、縦回転と速度でクッション到達位置と戻り幅を変えられる。" },
+});
+
+revise("R3-02", {
+  title: "フォローの1クッション",
+  purpose: "自然回転で上長クッションへ入り、速度だけで停止位置を作る。",
+  setup: "手球（3,1）、1番（4,3）。1番を上中央へ入れる。",
+  success: "1番を上中央へ入れ、上長クッション後に[6.75,7.5]×[3.5,3.75]へ止める。",
+  successZone: { x1: 6.75, y1: 3.5, x2: 7.5, y2: 3.75, label: "合格" },
+  zones: [{ x1: 6.75, y1: 3.5, x2: 7.5, y2: 3.75, label: "合格" }],
+  knowledge: { title: "フォローの1クッションで覚えること", body: "横回転を加えず、自然回転へ移る距離と速度で1クッション後の停止位置を作る。" },
+});
+
+revise("R3-03", {
+  purpose: "横回転なしで上長、右短の順に2クッションさせる。",
+  setup: "手球（3,1）、1番（4,3）。1番を上中央へ入れる。",
+  success: "1番を上中央へ入れ、上長、右短の順に2クッション後、[5.75,6.5]×[2.25,2.75]へ止める。",
+  successZone: { x1: 5.75, y1: 2.25, x2: 6.5, y2: 2.75, label: "合格" },
+  zones: [{ x1: 5.75, y1: 2.25, x2: 6.5, y2: 2.75, label: "合格" }],
+  knowledge: { title: "自然回転2クッションで覚えること", body: "1クッション課題と同じ入球線から、速度を上げて2本目のクッションまで経路を延ばす。" },
+});
+
+revise("R3-04", {
+  purpose: "2番を動かさず、次球へ構えられる長方形へ手球を止める。",
+  setup: "手球（3,1）、1番（4,3）、2番（6.75,2.5）。1番は上中央、2番は右上。",
+  success: "1番を上中央へ入れ、2番を動かさずに手球を[5.75,6.5]×[2.25,3]へ止める。",
+  knowledge: { title: "固定2球で覚えること", body: "次球を入れる前段階として、次の狙い線が取れる側へ手球を止める。" },
+});
+
+revise("R3-05", {
+  title: "固定3球・第1位置",
+  purpose: "3球を置いたまま、1番を入れて2番へつなぐ最初の位置取りを反復する。",
+  setup: "手球（4.5,2.25）、1番（2.5,3.5）、2番（4.75,3.5）、3番（6.75,3.5）。1番を左上へ入れる。",
+  balls: [
+    { id: "CB", label: "", color: "#f7f7f2", x: 4.5, y: 2.25 },
+    { id: "OB1", label: "1", color: "#e8b92e", x: 2.5, y: 3.5 },
+    { id: "OB2", label: "2", color: "#e8b92e", x: 4.75, y: 3.5 },
+    { id: "OB3", label: "3", color: "#e8b92e", x: 6.75, y: 3.5 },
+  ],
+  targetPocket: "左上",
+  targetPockets: ["左上"],
+  pockets: [{ x: 0, y: 4, label: "狙", name: "左上" }],
+  success: "1番を左上へ入れ、2番と3番を動かさず、手球を[3.25,4]×[2.75,3.5]へ止める。",
+  successZone: { x1: 3.25, y1: 2.75, x2: 4, y2: 3.5, label: "1後" },
+  zones: [{ x1: 3.25, y1: 2.75, x2: 4, y2: 3.5, label: "1後" }],
+  successBallId: "CB",
+  successMode: "stop",
+  trajectories: [
+    trajectory("CB", "#74e7ff", [{ x: 4.5, y: 2.25 }, { x: 2.68, y: 3.46 }, { x: 3.6, y: 3.15 }]),
+    trajectory("OB1", "#ffe36e", [{ x: 2.5, y: 3.5 }, { x: 0, y: 4 }]),
+    trajectory("OB2", "#ffe36e", [{ x: 4.75, y: 3.5 }]),
+    trajectory("OB3", "#ffe36e", [{ x: 6.75, y: 3.5 }]),
+  ],
+  knowledge: { title: "固定3球・第1位置で覚えること", body: "取り切り全体ではなく、次球の狙い線を残す第1ショットだけを定量的に固める。" },
+});
+
+revise("R4-01", {
+  setup: "手球（2,2）、的球なし。右短クッション中央へ真っすぐ構える。",
+  aimPoint: { x: 8, y: 2 },
+  success: "見越しを入れず右横回転で撞き、右短クッションとの最初の交点を[7.75,8]×[2,2.25]へ通す。",
+  successZone: { x1: 7.75, y1: 2, x2: 8, y2: 2.25, label: "交点" },
+  zones: [{ x1: 7.75, y1: 2, x2: 8, y2: 2.25, label: "交点" }],
+  successMode: "pass",
+});
+
+revise("R4-02", {
+  setup: "手球（2,2）、的球なし。右短クッション中央へ真っすぐ構える。",
+  aimPoint: { x: 8, y: 2 },
+  success: "見越しを入れず左横回転で撞き、右短クッションとの最初の交点を[7.75,8]×[1.75,2]へ通す。",
+  successZone: { x1: 7.75, y1: 1.75, x2: 8, y2: 2, label: "交点" },
+  zones: [{ x1: 7.75, y1: 1.75, x2: 8, y2: 2, label: "交点" }],
+  successMode: "pass",
+});
+
+revise("R4-03", {
+  title: "撞点量によるトビ比較",
+  purpose: "同じ狙い線と速度で、横撞点を増やしたときのトビ量を比較する。",
+  setup: "手球（2,2）、的球なし。右短クッション中央へ真っすぐ構え、R4-01より右撞点を増やす。",
+  balls: [{ id: "CB", label: "", color: "#f7f7f2", x: 2, y: 2 }],
+  aimPoint: { x: 8, y: 2 },
+  railAims: [{ x: 8, y: 2, label: "中心" }],
+  success: "見越しを入れず右横回転を増やし、最初の交点を[7.75,8]×[2,2.25]へ通してR4-01との差を記録する。",
+  successZone: { x1: 7.75, y1: 2, x2: 8, y2: 2.25, label: "交点" },
+  zones: [{ x1: 7.75, y1: 2, x2: 8, y2: 2.25, label: "交点" }],
+  successBallId: "CB",
+  successMode: "pass",
+  trajectories: [trajectory("CB", "#74e7ff", [{ x: 2, y: 2 }, { x: 8, y: 2.05 }])],
+  knowledge: { title: "撞点量によるトビ比較で覚えること", body: "同じ狙い線でも横撞点を増やすとトビ量が変わるため、撞点量ごとに必要な見越しを分けて記録する。" },
+});
+
+revise("R4-04", {
+  purpose: "横回転によるトビを見越し、同じ入球線へ戻す基準を作る。",
+  aimPoint: { x: 4, y: 2.8 },
+  success: "右横回転で1番を上中央へ入れ、基準の狙い線との差を記録する。撞点を左へ変えた場合も自分の補正量を測る。",
+  knowledge: { title: "横回転の見越し表で覚えること", body: "横撞点、速度、距離を固定し、入る狙い線を再現できる個人用の見越し表を作る。" },
+});
+
+revise("R4-07", {
+  setup: "手球（2,1）、的球なし。上長クッションのダイヤ5を第1点にする。",
+  aimPoint: { x: 5, y: 4 },
+  railAims: [{ x: 5, y: 4, label: "第1点" }],
+  success: "右横回転で上長、右短の順に進め、右短クッションとの第2交点を[7.75,8]×[2,2.25]へ通す。",
+  successZone: { x1: 7.75, y1: 2, x2: 8, y2: 2.25, label: "第2点" },
+  zones: [{ x1: 7.75, y1: 2, x2: 8, y2: 2.25, label: "第2点" }],
+  successMode: "pass",
+});
+
+revise("R4-08", {
+  setup: "手球（2,1）、的球なし。上長クッションのダイヤ5を第1点にする。",
+  aimPoint: { x: 5, y: 4 },
+  railAims: [{ x: 5, y: 4, label: "第1点" }],
+  success: "左横回転で上長、右短の順に進め、右短クッションとの第2交点を[7.75,8]×[2.5,2.75]へ通す。",
+  successZone: { x1: 7.75, y1: 2.5, x2: 8, y2: 2.75, label: "第2点" },
+  zones: [{ x1: 7.75, y1: 2.5, x2: 8, y2: 2.75, label: "第2点" }],
+  successMode: "pass",
+});
+
 revise("R7-01", {
   success: "両球停止後、的球を右上側、手球を的球進路に直角な左上側の合格域へ入れる。",
   successZone: { x1: 2.8, y1: 3.2, x2: 3.8, y2: 3.9, label: "手球" },
@@ -386,6 +510,19 @@ const verifiedSettings = {
   "R2-04b": { x: 0, y: .45, speedMps: .9, speed: "S1～S2" },
   "R2-05a": { x: 0, y: -.5, speedMps: 2.1, speed: "S3" },
   "R2-05b": { x: 0, y: -.55, speedMps: 2.45, speed: "S3" },
+  "R3-01": { x: 0, y: -.2, speedMps: 2.2, speed: "S3" },
+  "R3-02": { x: 0, y: .45, speedMps: 1.1, speed: "S2" },
+  "R3-03": { x: 0, y: .25, speedMps: 1.7, speed: "S3" },
+  "R3-04": { x: 0, y: .1, speedMps: 1.75, speed: "S3" },
+  "R3-05": { x: 0, y: -.4, speedMps: 2.4, speed: "S3" },
+  "R4-01": { x: .25, y: 0, speedMps: 1.2, speed: "S2" },
+  "R4-02": { x: -.25, y: 0, speedMps: 1.2, speed: "S2" },
+  "R4-03": { x: .5, y: 0, speedMps: 1.2, speed: "S2" },
+  "R4-04": { x: .25, y: 0, speedMps: 1.25, speed: "S2" },
+  "R4-05": { x: -.25, y: .25, speedMps: .8, speed: "S1" },
+  "R4-06": { x: .25, y: .25, speedMps: .9, speed: "S1～S2" },
+  "R4-07": { x: .5, y: .2, speedMps: 1.45, speed: "S2" },
+  "R4-08": { x: -.5, y: .2, speedMps: 1.45, speed: "S2" },
 };
 
 for (const [id, setting] of Object.entries(verifiedSettings)) {
@@ -408,6 +545,8 @@ const r002 = tasks.find((task) => task.id === "R0-02");
 if (r002?.zones?.[1]) r002.successZone = r002.zones[1];
 const r204b = tasks.find((task) => task.id === "R2-04b");
 if (r204b) r204b.successMode = "pass";
+const r404 = tasks.find((task) => task.id === "R4-04");
+if (r404) r404.aimPoint = { x: 4, y: 2.8 };
 
 for (const task of tasks) {
   task.setup = task.setup
@@ -418,6 +557,8 @@ for (const task of tasks) {
 chapters.find((chapter) => chapter.id === "r0").status = "公開中";
 chapters.find((chapter) => chapter.id === "r1").status = "公開中";
 chapters.find((chapter) => chapter.id === "r2").status = "公開中";
+chapters.find((chapter) => chapter.id === "r3").status = "公開中";
+chapters.find((chapter) => chapter.id === "r4").status = "公開中";
 
 fs.writeFileSync(output, `${JSON.stringify({ version: "0.2", generatedFrom: path.basename(input), chapters, drills: tasks }, null, 2)}\n`);
 console.log(`Imported ${tasks.length} tasks to ${output}`);

@@ -14,6 +14,7 @@
     "validate:browser-physics": "node --import tsx scripts/validate-browser-physics.ts",
     "generate:favicon": "node scripts/generate-favicon.mjs",
     "tune:r2": "node --import tsx scripts/tune-r2.ts",
+    "tune:r3-r4": "node --import tsx scripts/tune-r3-r4.ts",
     "simulate": ".venv/bin/python scripts/simulate_drills.py"
   },
   "dependencies": {
